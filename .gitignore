@@ -1,0 +1,8 @@
+.DS_Store
+.env
+.env.*
+*.log
+
+# local machine-specific notes
+notes/private.md
+local/
