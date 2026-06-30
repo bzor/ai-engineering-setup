@@ -9,3 +9,5 @@ vim.opt.shiftwidth = 2
 vim.opt.expandtab = true
 
 vim.g.mapleader = " "
+
+require("bzor")
