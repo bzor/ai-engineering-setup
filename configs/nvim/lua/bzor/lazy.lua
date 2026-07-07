@@ -52,6 +52,19 @@ require("lazy").setup({
         vim.keymap.set("n", "<leader>ph", builtin.help_tags, { desc = "Help tags" })
       end,
     },
+    {
+      "nvim-treesitter/nvim-treesitter",
+      branch = "master",
+      build = ":TSUpdate",
+      config = function()
+        require("nvim-treesitter.configs").setup({
+          ensure_installed = { "glsl", "lua", "javascript", "typescript", "tsx" },
+          auto_install = true,
+          highlight = { enable = true },
+          indent = { enable = true },
+        })
+      end,
+    },
   },
 
   install = {
