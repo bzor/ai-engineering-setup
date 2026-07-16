@@ -1,0 +1,403 @@
+# ==============================================================================
+# YAZI BLACK METAL — GORGOROTH
+# Inspired by metalelf0/black-metal-theme-neovim
+#
+# Palette:
+#   True Black       #000000
+#   Blackened Gray   #121212
+#   Dusty Charcoal   #222222
+#   Muted Ash        #999999
+#   Silver Ash       #c1c1c1
+#   Blood Red        #a06666
+#   Fjord Slate      #5f8787
+# ==============================================================================
+
+
+# ==============================================================================
+# APPLICATION
+# ==============================================================================
+
+[app]
+
+# Requires terminal OSC 11 support.
+overall = { bg = "#121212" }
+
+
+# ==============================================================================
+# FILE MANAGER
+# ==============================================================================
+
+[mgr]
+
+# Current working directory in the header.
+cwd = { fg = "#c1c1c1", bold = true }
+
+# Search highlighting.
+find_keyword  = { fg = "#a06666", bold = true }
+find_position = { fg = "#5f8787", bg = "#222222" }
+
+# Symbolic-link destination.
+symlink_target = { fg = "#5f8787", italic = true }
+
+# File operation markers.
+marker_copied   = { fg = "#5f8787", bold = true }
+marker_cut      = { fg = "#a06666", bold = true }
+marker_marked   = { fg = "#999999", bold = true }
+marker_selected = { fg = "#a06666", bold = true }
+
+# File operation counters.
+count_copied   = { fg = "#000000", bg = "#5f8787", bold = true }
+count_cut      = { fg = "#000000", bg = "#a06666", bold = true }
+count_selected = { fg = "#000000", bg = "#c1c1c1", bold = true }
+
+# Pane separators.
+border_symbol = "│"
+border_style  = { fg = "#222222" }
+
+
+# ==============================================================================
+# CURRENT-ITEM INDICATORS
+# ==============================================================================
+
+[indicator]
+
+# Parent pane.
+parent = { fg = "#222222" }
+
+# Current pane.
+current = { fg = "#a06666", bold = true }
+
+# Preview pane.
+preview = { fg = "#5f8787" }
+
+# Creates a substantial indicator instead of a thin character.
+padding = { open = "▌", close = "▐" }
+
+
+# ==============================================================================
+# TABS
+# ==============================================================================
+
+[tabs]
+
+active   = { fg = "#000000", bg = "#c1c1c1", bold = true }
+inactive = { fg = "#999999", bg = "#121212" }
+
+sep_inner = { open = "", close = "" }
+sep_outer = { open = "", close = "" }
+
+
+# ==============================================================================
+# MODES
+# ==============================================================================
+
+[mode]
+
+# Normal mode.
+normal_main = { fg = "#000000", bg = "#c1c1c1", bold = true }
+normal_alt  = { fg = "#c1c1c1", bg = "#121212" }
+
+# Select mode.
+select_main = { fg = "#000000", bg = "#5f8787", bold = true }
+select_alt  = { fg = "#5f8787", bg = "#121212" }
+
+# Unset mode.
+unset_main = { fg = "#000000", bg = "#222222" }
+unset_alt  = { fg = "#999999", bg = "#121212" }
+
+
+# ==============================================================================
+# STATUS BAR
+# ==============================================================================
+
+[status]
+
+overall = { fg = "#999999", bg = "#121212" }
+
+sep_left  = { open = "", close = "" }
+sep_right = { open = "", close = "" }
+
+# Permissions.
+perm_type  = { fg = "#c1c1c1" }
+perm_read  = { fg = "#5f8787" }
+perm_write = { fg = "#a06666" }
+perm_exec  = { fg = "#c1c1c1", bold = true }
+perm_sep   = { fg = "#222222" }
+
+# Task progress.
+progress_label  = { fg = "#c1c1c1", bold = true }
+progress_normal = { fg = "#5f8787", bg = "#222222" }
+progress_error  = { fg = "#a06666", bg = "#222222" }
+
+
+# ==============================================================================
+# KEYBINDING POPUP
+# ==============================================================================
+
+[which]
+
+cols = 3
+
+mask = { bg = "#121212" }
+cand = { fg = "#5f8787", bold = true }
+rest = { fg = "#999999" }
+desc = { fg = "#c1c1c1" }
+
+separator       = " ── "
+separator_style = { fg = "#222222" }
+
+
+# ==============================================================================
+# CONFIRMATION DIALOGS
+# ==============================================================================
+
+[confirm]
+
+border = { fg = "#a06666" }
+title  = { fg = "#c1c1c1", bold = true }
+body   = { fg = "#999999" }
+
+list = { fg = "#c1c1c1" }
+
+btn_yes = { fg = "#000000", bg = "#a06666", bold = true }
+btn_no  = { fg = "#000000", bg = "#c1c1c1", bold = true }
+
+btn_labels = ["  Yes  ", "  No  "]
+
+
+# ==============================================================================
+# FILE INFORMATION
+# ==============================================================================
+
+[spot]
+
+border = { fg = "#5f8787" }
+title  = { fg = "#c1c1c1", bold = true }
+
+tbl_col  = { fg = "#5f8787", bold = true }
+tbl_cell = { fg = "#c1c1c1", bg = "#222222" }
+
+
+# ==============================================================================
+# NOTIFICATIONS
+# ==============================================================================
+
+[notify]
+
+title_info  = { fg = "#5f8787", bold = true }
+title_warn  = { fg = "#c1c1c1", bold = true }
+title_error = { fg = "#a06666", bold = true }
+
+
+# ==============================================================================
+# SELECTION / PICKER
+# ==============================================================================
+
+[pick]
+
+border = { fg = "#5f8787" }
+
+active   = { fg = "#000000", bg = "#a06666", bold = true }
+inactive = { fg = "#c1c1c1" }
+
+
+# ==============================================================================
+# TEXT INPUT
+# ==============================================================================
+
+[input]
+
+border = { fg = "#a06666" }
+title  = { fg = "#c1c1c1", bold = true }
+value  = { fg = "#c1c1c1" }
+
+selected = { fg = "#000000", bg = "#c1c1c1" }
+
+
+# ==============================================================================
+# COMPLETION MENU
+# ==============================================================================
+
+[cmp]
+
+border = { fg = "#222222" }
+
+active   = { fg = "#000000", bg = "#a06666", bold = true }
+inactive = { fg = "#999999" }
+
+icon_file    = ""
+icon_folder  = ""
+icon_command = ""
+
+
+# ==============================================================================
+# TASK MANAGER
+# ==============================================================================
+
+[tasks]
+
+border  = { fg = "#222222" }
+title   = { fg = "#c1c1c1", bold = true }
+hovered = { fg = "#000000", bg = "#a06666", bold = true }
+
+
+# ==============================================================================
+# HELP
+# ==============================================================================
+
+[help]
+
+on      = { fg = "#a06666", bold = true }
+run     = { fg = "#5f8787" }
+desc    = { fg = "#999999" }
+hovered = { fg = "#c1c1c1", bg = "#222222" }
+footer  = { fg = "#c1c1c1", bg = "#121212" }
+
+icon_info  = ""
+icon_warn  = ""
+icon_error = ""
+
+
+# ==============================================================================
+# FILE AND DIRECTORY COLORS
+#
+# Rules are evaluated from top to bottom. More specific rules should remain
+# above the global fallback.
+# ==============================================================================
+
+[filetype]
+
+rules = [
+	# Broken symbolic links.
+	{
+		url = "*",
+		is = "orphan",
+		fg = "#a06666",
+		crossed = true
+	},
+
+	# Symbolic links.
+	{
+		url = "*",
+		is = "link",
+		fg = "#5f8787",
+		italic = true
+	},
+
+	# All directories.
+	{
+		url = "*/",
+		fg = "#c1c1c1",
+		bold = true
+	},
+
+	# Executable files.
+	{
+		url = "*",
+		is = "exec",
+		fg = "#a06666",
+		bold = true
+	},
+
+	# Shell scripts.
+	{
+		mime = "text/x-shellscript",
+		fg = "#a06666"
+	},
+
+	# Images.
+	{
+		mime = "image/*",
+		fg = "#5f8787"
+	},
+
+	# Video.
+	{
+		mime = "video/*",
+		fg = "#5f8787"
+	},
+
+	# Audio.
+	{
+		mime = "audio/*",
+		fg = "#5f8787"
+	},
+
+	# ZIP archives.
+	{
+		mime = "application/zip",
+		fg = "#999999"
+	},
+
+	# Tar archives.
+	{
+		mime = "application/x-tar",
+		fg = "#999999"
+	},
+
+	# Gzip archives.
+	{
+		mime = "application/gzip",
+		fg = "#999999"
+	},
+
+	{
+		mime = "application/x-gzip",
+		fg = "#999999"
+	},
+
+	# Bzip archives.
+	{
+		mime = "application/x-bzip2",
+		fg = "#999999"
+	},
+
+	# 7-Zip archives.
+	{
+		mime = "application/x-7z-compressed",
+		fg = "#999999"
+	},
+
+	# RAR archives.
+	{
+		mime = "application/vnd.rar",
+		fg = "#999999"
+	},
+
+	# Plain text and source files.
+	{
+		mime = "text/*",
+		fg = "#c1c1c1"
+	},
+
+	# Empty files.
+	{
+		mime = "inode/empty",
+		fg = "#222222"
+	},
+
+	# Global file fallback.
+	{
+		url = "*",
+		fg = "#999999"
+	}
+]
+
+
+# ==============================================================================
+# ICON OVERRIDES
+#
+# Glob icon rules have higher matching priority than Yazi's built-in named
+# directory rules. This catches Desktop, Documents, Downloads, .config, Git
+# directories, and every other directory before the blue defaults are used.
+# ==============================================================================
+
+[icon]
+
+prepend_globs = [
+	{
+		url = "*/",
+		text = "",
+		fg = "#c1c1c1"
+	}
+]

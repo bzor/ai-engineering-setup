@@ -29,6 +29,19 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   spec = {
     {
+      "metalelf0/black-metal-theme-neovim",
+      lazy = false,
+      priority = 1000,
+      config = function()
+        require("black-metal").setup({
+          theme = "gorgoroth",
+        })
+
+        require("black-metal").load()
+      end,
+    },
+
+    {
       "nvim-telescope/telescope.nvim",
       version = "*",
       dependencies = {
@@ -52,6 +65,26 @@ require("lazy").setup({
         vim.keymap.set("n", "<leader>ph", builtin.help_tags, { desc = "Help tags" })
       end,
     },
+
+    {
+      "mikavilpas/yazi.nvim",
+      version = "*",
+      event = "VeryLazy",
+      dependencies = {
+        "nvim-lua/plenary.nvim",
+      },
+      keys = {
+        {
+          "<leader>py",
+          "<cmd>Yazi<cr>",
+          desc = "Open Yazi",
+        },
+      },
+      opts = {
+        open_for_directories = false,
+      },
+    },
+
     {
       "nvim-treesitter/nvim-treesitter",
       branch = "master",
