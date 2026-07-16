@@ -33,12 +33,15 @@ name=$(basename "$selected" | tr '.' '_')
 
 open_layout() {  # $1 = target window (session:name), $2 = path
   local target="$1" path="$2"
-  local main right
-  main=$(tmux list-panes -t "$target" -F '#{pane_id}' | head -1)
-  right=$(tmux split-window -h -t "$main" -c "$path" -l 40% -P -F '#{pane_id}')
-  tmux split-window -v -t "$right" -c "$path" -l 50%
-  tmux send-keys -t "$main" 'nvim' C-m
-  tmux select-pane -t "$main"
+  local left right claude
+  # 50/50 columns: left = small command terminal (top) over claude (bottom 70%),
+  # right = nvim full height.
+  left=$(tmux list-panes -t "$target" -F '#{pane_id}' | head -1)
+  right=$(tmux split-window -h -t "$left" -c "$path" -l 50% -P -F '#{pane_id}')
+  claude=$(tmux split-window -v -t "$left" -c "$path" -l 70% -P -F '#{pane_id}')
+  tmux send-keys -t "$right" 'nvim' C-m
+  tmux send-keys -t "$claude" 'claude' C-m
+  tmux select-pane -t "$claude"
 }
 
 # Not inside tmux: start/attach the work session with this project as a window.
@@ -49,10 +52,14 @@ if [ -z "${TMUX:-}" ]; then
   exit 0
 fi
 
-# Anchor to the pane the popup was launched from ($TMUX_PANE), so we act on the
-# session the user is actually in — not whatever tmux guesses is "current".
-pane="${TMUX_PANE:?not launched from a tmux pane}"
-session=$(tmux display-message -p -t "$pane" '#S')
+# Find the session we're acting on. In a display-popup TMUX_PANE is unset,
+# but "current" resolves to the client the popup is on, which is what we want.
+# When run from a regular pane, anchor to that pane explicitly.
+if [ -n "${TMUX_PANE:-}" ]; then
+  session=$(tmux display-message -p -t "$TMUX_PANE" '#S')
+else
+  session=$(tmux display-message -p '#S')
+fi
 if tmux list-windows -t "$session" -F '#W' | grep -qx "$name"; then
   tmux select-window -t "$session:$name"   # already open — just jump to it
 else
