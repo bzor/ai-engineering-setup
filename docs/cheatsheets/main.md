@@ -1,8 +1,8 @@
 # Main Cheat Sheet
 
 The everyday commands, all tools in one place. Deeper dives live in the
-per-tool sheets: [tmux](tmux.md), [kitty](kitty.md), [zoxide](zoxide.md),
-[git](git.md), [vim motions](vim-motions.md).
+per-tool sheets: [tmux](tmux.md), [kitty](kitty.md), [yazi](yazi.md),
+[zoxide](zoxide.md), [git](git.md), [vim motions](vim-motions.md).
 
 ## Jumping around (zoxide)
 
