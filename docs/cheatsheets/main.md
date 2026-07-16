@@ -50,6 +50,15 @@ Space n h           notification history
 Ctrl-d / Ctrl-u     half-page scroll, centered
 ```
 
+Multi-cursor (column edits, like VS Code):
+
+```
+Ctrl-v  j j j       visual block: extend down over the rows
+  then I text Esc   insert text on every row at once (A = append)
+  then $ A ; Esc    append at each line's true end (ragged lengths)
+gv                  reselect the last block
+```
+
 ## sketchybar
 
 ```

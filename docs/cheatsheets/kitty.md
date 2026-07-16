@@ -16,6 +16,13 @@ cmd ,                edit kitty.conf
 
 Tabs/splits exist (`cmd t`, etc.) but tmux owns that job here.
 
+## Custom app icon
+
+kitty (0.36+) uses `configs/kitty/kitty.app.png` if present — Dock and the
+Cmd-Tab switcher, no `.app` bundle editing, survives upgrades. Current icon is
+`kitty.app.png` (1024×1024; macOS rounds it into the squircle). To swap it,
+replace that file and fully quit kitty (`cmd q`) — the icon applies on launch.
+
 ## Kittens (bundled mini-tools)
 
 ```bash

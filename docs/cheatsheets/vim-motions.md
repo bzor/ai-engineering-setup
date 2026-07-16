@@ -503,6 +503,50 @@ Move selected lines up:
 
 This can be mapped later for easier use.
 
+## Visual Block (multi-cursor)
+
+The native equivalent of VS Code's column / multi-cursor editing. Great for
+inserting the same text down a column of rows at once.
+
+Enter Visual Block mode:
+
+```text
+Ctrl-v
+```
+
+Then extend the block down with `j` (and `h`/`l` for width), and use:
+
+```text
+I    insert before the block, on every row
+A    append after the block, on every row
+c    change: delete the block, then type the replacement
+d    delete the block (no insert)
+```
+
+Type your text, then press `Esc` — the edit applies to all rows at once.
+
+Important: while typing you only see the change on the top row. It fans out to
+the other rows the moment you hit `Esc`. That's expected.
+
+Examples:
+
+```text
+Ctrl-v jjj I text Esc      insert "text" at the column, all 4 rows
+Ctrl-v jjj A text Esc      append "text" at the column, all rows
+Ctrl-v jjj $ A ; Esc       append ";" at the true end of each line (ragged lengths)
+Ctrl-v jjj d               delete the column block
+```
+
+Reselect the last block:
+
+```text
+gv
+```
+
+For free-floating (non-columnar) multiple cursors like VS Code's `Cmd-D`, that's
+not built in — the `vim-visual-multi` plugin does it. For column edits, `Ctrl-v`
++ `I`/`A` is all you need.
+
 ## Counts
 
 Most motions and commands accept counts.
