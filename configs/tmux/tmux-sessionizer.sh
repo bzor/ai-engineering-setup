@@ -33,13 +33,13 @@ name=$(basename "$selected" | tr '.' '_')
 
 open_layout() {  # $1 = target window (session:name), $2 = path
   local target="$1" path="$2"
-  local left right claude
-  # 50/50 columns: left = small command terminal (top) over claude (bottom 70%),
-  # right = nvim full height.
-  left=$(tmux list-panes -t "$target" -F '#{pane_id}' | head -1)
-  right=$(tmux split-window -h -t "$left" -c "$path" -l 50% -P -F '#{pane_id}')
-  claude=$(tmux split-window -v -t "$left" -c "$path" -l 70% -P -F '#{pane_id}')
-  tmux send-keys -t "$right" 'nvim' C-m
+  local editor right claude
+  # 50/50 columns: nvim full height on the left; right = small command
+  # terminal (top) over claude (bottom 70%).
+  editor=$(tmux list-panes -t "$target" -F '#{pane_id}' | head -1)
+  right=$(tmux split-window -h -t "$editor" -c "$path" -l 50% -P -F '#{pane_id}')
+  claude=$(tmux split-window -v -t "$right" -c "$path" -l 70% -P -F '#{pane_id}')
+  tmux send-keys -t "$editor" 'nvim' C-m
   tmux send-keys -t "$claude" 'claude' C-m
   tmux select-pane -t "$claude"
 }

@@ -2,74 +2,35 @@
 
 tmux is a terminal multiplexer. It lets me create persistent terminal sessions with multiple windows and panes inside a single terminal window.
 
-The mental model:
+The mental model — one `work` session, one window per project:
 
 ```text
-tmux session
-  ├─ window 1: editor
-  │    ├─ pane: nvim
-  │    └─ pane: shell
-  ├─ window 2: server
-  ├─ window 3: git
-  ├─ window 4: claude
-  └─ window 5: codex
+work session
+  ├─ window 1: ai-engineering-setup    nvim | claude / terminal
+  ├─ window 2: hammerworth             nvim | claude / terminal
+  ├─ window 3: small-omens             ...
+  └─ window n: (any project, via prefix f)
 ```
 
-## Custom `tw` Helper
+## The `work` Session (`tmux-work`)
 
-I added a shell helper called `tw` for quickly creating or attaching to named tmux sessions.
-
-In `~/.zshrc`:
+The whole environment is built by one script, `configs/tmux/tmux-work.sh`
+(on PATH as `tmux-work`):
 
 ```bash
-tw() {
-  local session="${1:-work}"
-  tmux new-session -A -s "$session"
-}
+tmux-work
 ```
 
-Reload shell config:
+First run: creates the `work` session with a window per project in the
+script's `PROJECTS` array, each laid out with nvim, claude, and a spare
+terminal, then attaches. Any later run just re-attaches — windows, panes,
+and running processes survive detaching or closing the terminal.
 
-```bash
-source ~/.zshrc
-```
+Edit the `PROJECTS` array in the script to change the everyday lineup.
 
-Usage:
-
-```bash
-tw
-```
-
-Creates or attaches to the default `work` session.
-
-```bash
-tw work
-```
-
-Creates or attaches to a session named `work`.
-
-```bash
-tw bzor
-tw client
-tw ai-lab
-tw scratch
-```
-
-Creates or attaches to named project sessions.
-
-The underlying tmux command is:
-
-```bash
-tmux new-session -A -s work
-```
-
-Meaning:
-
-```text
-new-session    create a new tmux session
--A             attach if the session already exists
--s work        name the session "work"
-```
+For anything not in the list, `prefix f` fuzzy-picks any project under
+`~/Projects` or `~/Repos` and opens it as a new window in the same session
+(jumping to it instead if it's already open).
 
 ## Sessions
 
@@ -117,19 +78,14 @@ tmux kill-server
 
 ## Prefix Key
 
-The default tmux prefix is:
+My prefix is:
 
 ```text
-Ctrl-b
+Ctrl-Space    (primary)
+Ctrl-b        (tmux default, still works as secondary)
 ```
 
-Most tmux commands start by pressing:
-
-```text
-Ctrl-b
-```
-
-Then pressing another key.
+Most tmux commands start with the prefix, then another key.
 
 Example:
 
@@ -345,109 +301,38 @@ bind k select-pane -U
 bind l select-pane -R
 ```
 
-## Recommended Project Layout
-
-For coding + AI engineering:
-
-```text
-1: editor     nvim
-2: shell      git, scripts, commands
-3: server     npm run dev / vite / backend
-4: claude     Claude Code
-5: codex      Codex CLI
-```
-
-Example:
-
-```bash
-tw ai-engineering-setup
-```
-
-Then inside tmux:
-
-```text
-Ctrl-b ,      rename first window to editor
-Ctrl-b c      create a new window
-Ctrl-b ,      rename it server
-Ctrl-b c      create a new window
-Ctrl-b ,      rename it claude
-Ctrl-b c      create a new window
-Ctrl-b ,      rename it codex
-```
-
 ## Daily Workflow
 
-Start or attach to a project session:
+Start (or re-attach to) the work session from a plain shell:
 
 ```bash
-tw work
+tmux-work
 ```
 
-or:
-
-```bash
-tw ai-engineering-setup
-```
-
-Open Neovim in the editor window:
-
-```bash
-nvim
-```
-
-Create a new window for the dev server:
+Every active project is already a window with nvim, claude, and a spare
+terminal. Jump between projects with:
 
 ```text
-Ctrl-b c
+prefix 1..9       go to window by number
+prefix n / p      next / previous window
+prefix f          fuzzy-open any other project as a new window
 ```
 
-Rename it:
+Need an extra pane for a dev server or one-off command? Split inside the
+project's window:
 
 ```text
-Ctrl-b ,
-```
-
-Start the server:
-
-```bash
-npm run dev
-```
-
-Create another window for Claude Code:
-
-```text
-Ctrl-b c
-```
-
-Run:
-
-```bash
-claude
-```
-
-Create another window for Codex:
-
-```text
-Ctrl-b c
-```
-
-Run:
-
-```bash
-codex
+prefix |          split right
+prefix -          split down
 ```
 
 Detach when done:
 
 ```text
-Ctrl-b d
+prefix d
 ```
 
-Later, resume with:
-
-```bash
-tw work
-```
+Everything keeps running; `tmux-work` later drops you right back in.
 
 ## Most Common Commands
 
@@ -470,22 +355,11 @@ Ctrl-b r      reload config, if custom binding exists
 
 tmux sessions persist after closing the terminal window.
 
-This means I can:
+This means I can start working, detach with `prefix d` (or just close the
+terminal), and later run:
 
 ```bash
-tw work
-```
-
-Start working, then detach:
-
-```text
-Ctrl-b d
-```
-
-Later I can reconnect:
-
-```bash
-tw work
+tmux-work
 ```
 
 and my windows, panes, and running processes are still there.

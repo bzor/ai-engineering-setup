@@ -1,0 +1,41 @@
+# ~.zshrc
+export ZSH=~/.oh-my-zsh
+# disable oh-my-zsh themes for pure prompt
+ZSH_THEME=""
+source $ZSH/oh-my-zsh.sh
+export ZPLUG_HOME=$(brew --prefix)/opt/zplug
+source $ZPLUG_HOME/init.zsh
+zplug "mafredri/zsh-async", from:github
+zplug "sindresorhus/pure", use:pure.zsh, from:github, as:theme
+zplug load
+# Install plugins if there are plugins that have not been installed
+if ! zplug check --verbose; then
+    printf "Install? [y/N]: "
+    if read -q; then
+        echo; zplug install
+    fi
+fi
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+export PATH="$HOME/.local/bin:$PATH"
+
+PATH="$PATH:/Applications/WezTerm.app/Contents/MacOS"
+export PATH
+
+export EDITOR="nvim"
+export VISUAL="nvim"
+
+DISABLE_AUTO_TITLE="true"
+
+precmd() {
+  # sets the tab title to current dir
+  echo -ne "\e]1;${PWD##*/}\a"
+}
+
+# Session/window management lives in tmux-work + tmux-sessionizer
+# (configs/tmux/, symlinked onto PATH by scripts/link-configs.sh)
+
+# zoxide — smarter cd that learns your habits (z <keyword>, zi = interactive)
+eval "$(zoxide init zsh)"
