@@ -42,6 +42,57 @@ require("lazy").setup({
     },
 
     {
+      "folke/snacks.nvim",
+      priority = 900,
+      lazy = false,
+      ---@type snacks.Config
+      opts = {
+        bigfile = { enabled = true }, -- disable heavy features (treesitter etc.) on huge files
+        quickfile = { enabled = true }, -- render the file before plugins finish loading
+        notifier = { enabled = true }, -- vim.notify as floating popups with history
+        indent = { enabled = true }, -- indent guides + current-scope highlight
+        input = { enabled = true }, -- nicer vim.ui.input (rename prompts etc.)
+        words = { enabled = true }, -- highlight other references of symbol under cursor (needs LSP)
+        dashboard = {
+          enabled = true,
+          preset = {
+            header = [[
+  +#############=##########.############## #############=  
+  *@@@@@@@@@@@%+%@@@@@@@@%. @@@@@@@@@@@@@@ @@@@@@@@@@@@+   
+  *@@=......=%- .......*%.  @@@@@@@@@@@@@@ @@*.......%+    
+  *@@-     -%-        =%.   @@@@@@@@@@@@@@ @@*      #*     
+  *@@-    -%+        =%.    @@@@@@@@@@@@@@ @@*     #%      
+  *@@-    -%%-      =%-     @@@@@@@@@@@@@@ @@*     #@*     
+  *@@-     -%%-    -%-      @@@@@@@@@@@@@@ @@*      #@*    
+  *@@-      -%%-  -%-       @@@@@@@@@@@@@@ @@*       %@+   
+  *@@-       =%%--%-        @@@@@@@@@@@@@@ @@*       .%@+  
+  *@@#********%@%=#********-@@@@@@@@@@@@@@ @@*        .%@+ 
+  +###############=########=############## ##+         .##=]],
+            keys = {
+              { icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
+              { icon = " ", key = "g", desc = "Find Text", action = ":lua Snacks.dashboard.pick('live_grep')" },
+              { icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
+              { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
+              { icon = " ", key = "c", desc = "Config", action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})" },
+              { icon = "󰒲 ", key = "L", desc = "Lazy", action = ":Lazy" },
+              { icon = " ", key = "q", desc = "Quit", action = ":qa" },
+            },
+          },
+          sections = {
+            { section = "header" },
+            { section = "keys", gap = 1, padding = 1 },
+            { section = "recent_files", icon = " ", title = "Recent Files", indent = 2, padding = 1 },
+            { section = "startup" },
+          },
+        },
+      },
+      keys = {
+        { "<leader>nh", function() Snacks.notifier.show_history() end, desc = "Notification history" },
+        { "<leader>nd", function() Snacks.notifier.hide() end, desc = "Dismiss notifications" },
+      },
+    },
+
+    {
       "nvim-telescope/telescope.nvim",
       version = "*",
       dependencies = {
