@@ -44,12 +44,16 @@ for path in "${PROJECTS[@]}"; do
     main=$(tmux new-window -t "$SESSION" -n "$name" -c "$path" -P -F '#{pane_id}')
   fi
 
-  # right column (40% wide), then split it into top (claude) / bottom (terminal)
-  right=$(tmux split-window -h -t "$main" -c "$path" -l 40% -P -F '#{pane_id}')
-  tmux split-window -v -t "$right" -c "$path" -l 50%
+  # Same layout as tmux-sessionizer: 50/50 columns, nvim full height on the
+  # left; right = small command terminal (top) over claude pane (bottom 70%).
+  right=$(tmux split-window -h -t "$main" -c "$path" -l 50% -P -F '#{pane_id}')
+  claude=$(tmux split-window -v -t "$right" -c "$path" -l 70% -P -F '#{pane_id}')
 
-  # Launch nvim in the main pane. Comment out to leave it as a plain shell.
   tmux send-keys -t "$main" 'nvim' C-m
+  # Not auto-launching claude here (unlike the sessionizer) — this loop builds
+  # every project window at once, which would spawn one claude per project.
+  # Uncomment to opt in:
+  # tmux send-keys -t "$claude" 'claude' C-m
   tmux select-pane -t "$main"
 done
 

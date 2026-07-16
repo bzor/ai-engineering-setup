@@ -35,7 +35,8 @@ Space p f           find file (telescope)
 Space p s           live grep project
 Space p b           buffers
 Space p y           yazi in nvim        (z inside yazi = zoxide jump)
-yazi                yazi from the shell
+y                   yazi from the shell; quitting cd's you to the browsed dir
+                    (Q quits without the cd)
 ```
 
 ## nvim extras
@@ -44,6 +45,13 @@ yazi                yazi from the shell
 (dashboard)         f find  g grep  r recent  c config  L lazy  q quit
 Space n h           notification history
 Ctrl-d / Ctrl-u     half-page scroll, centered
+```
+
+## sketchybar
+
+```
+sketchybar --reload             apply config edits
+brew services restart sketchybar   if it gets wedged
 ```
 
 ## kitty

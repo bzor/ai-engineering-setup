@@ -20,6 +20,7 @@ ln -sf "$REPO_DIR/configs/tmux/tmux.conf" "$HOME/.tmux.conf"
 ln -sf "$REPO_DIR/configs/zsh/zshrc" "$HOME/.zshrc"
 link_dir "$REPO_DIR/configs/nvim" "$HOME/.config/nvim"
 link_dir "$REPO_DIR/configs/kitty" "$HOME/.config/kitty"
+link_dir "$REPO_DIR/configs/sketchybar" "$HOME/.config/sketchybar"
 
 # tmux helper scripts onto PATH
 mkdir -p "$HOME/.local/bin"

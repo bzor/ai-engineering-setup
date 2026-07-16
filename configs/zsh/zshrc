@@ -37,5 +37,16 @@ precmd() {
 # Session/window management lives in tmux-work + tmux-sessionizer
 # (configs/tmux/, symlinked onto PATH by scripts/link-configs.sh)
 
+# y — open yazi; on quit, cd to the directory you navigated to (yazi's
+# recommended shell wrapper). Press Q instead of q to quit without the cd.
+y() {
+  local tmp cwd
+  tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+  yazi "$@" --cwd-file="$tmp"
+  IFS= read -r -d '' cwd < "$tmp"
+  [ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
+  rm -f -- "$tmp"
+}
+
 # zoxide — smarter cd that learns your habits (z <keyword>, zi = interactive)
 eval "$(zoxide init zsh)"
