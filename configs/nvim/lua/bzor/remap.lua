@@ -1,0 +1,3 @@
+-- Center the window after half-page scrolls
+vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down half page and center" })
+vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up half page and center" })
