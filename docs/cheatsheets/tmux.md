@@ -318,6 +318,24 @@ prefix n / p      next / previous window
 prefix f          fuzzy-open any other project as a new window
 ```
 
+Move left/right along the bar without the prefix:
+
+```text
+Alt-h / Alt-l     previous / next window
+```
+
+Reorder projects by dragging the current window along the bar:
+
+```text
+Alt-H / Alt-L     drag current window left / right (focus follows it)
+```
+
+Each drag is an adjacent swap, so dragging a window N slots inserts it there
+and shifts the rest over — e.g. drag window 5 left three times and it lands at
+slot 2. To open a project straight into slot 1: `prefix f`, then Alt-H until
+it's at the front. Right-clicking a window in the status bar also opens a menu
+(Swap Left/Right, Rename, Kill, New).
+
 Need an extra pane for a dev server or one-off command? Split inside the
 project's window:
 

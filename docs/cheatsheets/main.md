@@ -22,6 +22,9 @@ prefix = Ctrl-Space   (Ctrl-b also works)
 tmux-work           build/attach the work session (window per active project)
 prefix f            fuzzy-open any other project as a window (nvim + term/claude)
 prefix 1..9         jump to window
+Alt-h / Alt-l       prev / next window (no prefix)
+Alt-H / Alt-L       drag current window left / right along the bar
+                    (drag N slots = insert there; right-click a window for a menu)
 prefix |  /  -      split right / down
 prefix h j k l      move between panes
 prefix [            scrollback/copy mode (vi keys; v select, y yank)
