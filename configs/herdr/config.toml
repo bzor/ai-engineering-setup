@@ -36,9 +36,10 @@ red      = "#a06666"   # Blood Red — blocked / needs-you state stands out
 green    = "#5f8787"   # Fjord Slate — done / working
 blue     = "#5f8787"   # Fjord Slate
 yellow   = "#999999"   # Muted Ash — in-progress / idle
-# overlay0 = the idle agent name in the sidebar (it also drove the unfocused
-# pane border, but borders are off now). Muted Ash keeps it clearly readable.
-overlay0 = "#999999"
+# overlay0 = unfocused pane border AND idle agent name in the sidebar. Dimmed
+# below the focused accent (#5f8787) so the focused pane's border pops; still
+# light enough to read the idle agent labels.
+overlay0 = "#6a6a6a"
 
 # prefix f — fuzzy project launcher (herdr analog of tmux prefix f). Opens the
 # project as a workspace (nvim | terminal / claude), reusing it if it exists.
@@ -54,11 +55,12 @@ height = "80%"
 delivery = "system"
 
 [ui]
-# Borders off entirely — herdr draws them in the accent/overlay tokens, which
-# are shared with the tab labels and sidebar agent names, so a dark border
-# forced that text unreadable. With borders off, panes separate by the gap
-# (spatial only — herdr has no gap-color token) and the shared tokens are free
-# to be bright and readable.
-pane_borders = false
-pane_gaps = true
+# Borders on so panes are visible. herdr draws them in the accent (focused) /
+# overlay0 (unfocused) tokens, which are shared with the tab labels + agent
+# names — so keeping that text readable means the borders land on the visible
+# side (Fjord Slate focused, Muted Ash unfocused). pane_gaps=false = one shared
+# divider between panes, not a doubled frame around each. Dim overlay0 if the
+# unfocused borders read too loud (trade-off: it also dims idle agent names).
+pane_borders = true
+pane_gaps = false
 show_agent_labels_on_pane_borders = true
