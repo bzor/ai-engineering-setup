@@ -5,6 +5,18 @@
 # Match tmux: Ctrl-Space as the prefix (Ctrl-b is herdr's default).
 prefix = "ctrl+space"
 
+# Split right on `|` like tmux (herdr's default is prefix+v). "vertical" here
+# means the divider is vertical. Everything else already matches tmux out of
+# the box: split_horizontal is prefix+minus, and focus_pane_* is prefix+h/j/k/l.
+# `herdr --default-config` lists every rebindable action.
+split_vertical = "prefix+|"
+
+# Alt-k / Alt-j switch workspaces (projects) with no prefix — j/k track the
+# vertical sidebar (k = up = previous, j = down = next). (Needs kitty's
+# macos_option_as_alt = yes, which is set.) prefix n/p and 1..9 stay on tabs.
+previous_workspace = "alt+k"
+next_workspace = "alt+j"
+
 [theme]
 # "terminal" follows the host ANSI palette — kitty already runs Black Metal,
 # so herdr inherits it. The overrides below pin the brand accents.
@@ -14,19 +26,39 @@ name = "terminal"
 # Black Metal — Gorgoroth
 #   Blackened Gray #121212 · Dusty Charcoal #222222 · Muted Ash #999999
 #   Silver Ash #c1c1c1 · Blood Red #a06666 · Fjord Slate #5f8787
-panel_bg = "#121212"   # match kitty background
-accent   = "#5f8787"   # Fjord Slate — focus / selection accent
+panel_bg = "#121212"   # match kitty background (this token = the tab-bar bg;
+                       # pane interiors + gap are the terminal's own black and
+                       # aren't themeable, so block-separation isn't possible)
+accent   = "#5f8787"   # Fjord Slate — with pane borders off, accent only colors
+                       # tab labels + focus/nav highlights now, so it's back to
+                       # the brand accent and reads cleanly.
 red      = "#a06666"   # Blood Red — blocked / needs-you state stands out
 green    = "#5f8787"   # Fjord Slate — done / working
 blue     = "#5f8787"   # Fjord Slate
 yellow   = "#999999"   # Muted Ash — in-progress / idle
+# overlay0 = the idle agent name in the sidebar (it also drove the unfocused
+# pane border, but borders are off now). Muted Ash keeps it clearly readable.
+overlay0 = "#999999"
 
 # prefix f — fuzzy project launcher (herdr analog of tmux prefix f). Opens the
 # project as a workspace (nvim | terminal / claude), reusing it if it exists.
 [[keys.command]]
 key = "prefix+f"
 type = "popup"
-command = "/Users/bzor/Projects/ai-engineering-setup/configs/herdr/herdr-sessionizer.sh"
+command = "herdr-sessionizer"   # symlinked onto PATH by scripts/link-configs.sh
 description = "project launcher (fzf → workspace)"
 width = "80%"
 height = "80%"
+
+[ui.toast]
+delivery = "system"
+
+[ui]
+# Borders off entirely — herdr draws them in the accent/overlay tokens, which
+# are shared with the tab labels and sidebar agent names, so a dark border
+# forced that text unreadable. With borders off, panes separate by the gap
+# (spatial only — herdr has no gap-color token) and the shared tokens are free
+# to be bright and readable.
+pane_borders = false
+pane_gaps = true
+show_agent_labels_on_pane_borders = true

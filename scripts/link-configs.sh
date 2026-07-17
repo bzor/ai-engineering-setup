@@ -22,9 +22,16 @@ link_dir "$REPO_DIR/configs/nvim" "$HOME/.config/nvim"
 link_dir "$REPO_DIR/configs/kitty" "$HOME/.config/kitty"
 link_dir "$REPO_DIR/configs/sketchybar" "$HOME/.config/sketchybar"
 
-# tmux helper scripts onto PATH
+# herdr: link the config FILE, not the dir — herdr keeps its sockets, logs and
+# session.json in ~/.config/herdr alongside it.
+mkdir -p "$HOME/.config/herdr"
+ln -sf "$REPO_DIR/configs/herdr/config.toml" "$HOME/.config/herdr/config.toml"
+
+# helper scripts onto PATH
 mkdir -p "$HOME/.local/bin"
 ln -sf "$REPO_DIR/configs/tmux/tmux-work.sh" "$HOME/.local/bin/tmux-work"
 ln -sf "$REPO_DIR/configs/tmux/tmux-sessionizer.sh" "$HOME/.local/bin/tmux-sessionizer"
+ln -sf "$REPO_DIR/configs/herdr/herdr-sessionizer.sh" "$HOME/.local/bin/herdr-sessionizer"
+ln -sf "$REPO_DIR/configs/herdr/herdr-work.sh" "$HOME/.local/bin/herdr-work"
 
 echo "Linked configs from $REPO_DIR"

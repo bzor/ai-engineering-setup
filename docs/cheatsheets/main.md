@@ -1,8 +1,9 @@
 # Main Cheat Sheet
 
 The everyday commands, all tools in one place. Deeper dives live in the
-per-tool sheets: [tmux](tmux.md), [kitty](kitty.md), [yazi](yazi.md),
-[zoxide](zoxide.md), [git](git.md), [vim motions](vim-motions.md).
+per-tool sheets: [tmux](tmux.md), [herdr](herdr.md), [kitty](kitty.md),
+[yazi](yazi.md), [zoxide](zoxide.md), [git](git.md),
+[vim motions](vim-motions.md).
 
 ## Jumping around (zoxide)
 
@@ -29,6 +30,20 @@ prefix |  /  -      split right / down
 prefix h j k l      move between panes
 prefix [            scrollback/copy mode (vi keys; v select, y yank)
 prefix r            reload tmux config
+```
+
+## Agents (herdr)
+
+```
+prefix = Ctrl-Space   (own kitty window — don't nest in tmux)
+
+herdr               launch/attach the agent multiplexer
+herdr-work          open every active project as a workspace (sidebar row each)
+prefix f            fuzzy-open any other project as a workspace (nvim + term/claude)
+prefix w            workspace picker              prefix | / -   split right / down
+prefix h j k l      move between panes            prefix r       resize mode (h/j/k/l)
+prefix z            zoom pane                     prefix q       detach
+prefix ?            live keybinding help
 ```
 
 ## Files
