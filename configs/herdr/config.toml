@@ -1,0 +1,32 @@
+# Herdr config — symlinked to ~/.config/herdr/config.toml
+# Matches the tmux prefix (Ctrl-Space) and the Black Metal / Gorgoroth palette.
+
+[keys]
+# Match tmux: Ctrl-Space as the prefix (Ctrl-b is herdr's default).
+prefix = "ctrl+space"
+
+[theme]
+# "terminal" follows the host ANSI palette — kitty already runs Black Metal,
+# so herdr inherits it. The overrides below pin the brand accents.
+name = "terminal"
+
+[theme.custom]
+# Black Metal — Gorgoroth
+#   Blackened Gray #121212 · Dusty Charcoal #222222 · Muted Ash #999999
+#   Silver Ash #c1c1c1 · Blood Red #a06666 · Fjord Slate #5f8787
+panel_bg = "#121212"   # match kitty background
+accent   = "#5f8787"   # Fjord Slate — focus / selection accent
+red      = "#a06666"   # Blood Red — blocked / needs-you state stands out
+green    = "#5f8787"   # Fjord Slate — done / working
+blue     = "#5f8787"   # Fjord Slate
+yellow   = "#999999"   # Muted Ash — in-progress / idle
+
+# prefix f — fuzzy project launcher (herdr analog of tmux prefix f). Opens the
+# project as a workspace (nvim | terminal / claude), reusing it if it exists.
+[[keys.command]]
+key = "prefix+f"
+type = "popup"
+command = "/Users/bzor/Projects/ai-engineering-setup/configs/herdr/herdr-sessionizer.sh"
+description = "project launcher (fzf → workspace)"
+width = "80%"
+height = "80%"
