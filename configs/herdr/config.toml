@@ -1,3 +1,4 @@
+onboarding = false
 # Herdr config — symlinked to ~/.config/herdr/config.toml
 # Matches the tmux prefix (Ctrl-Space) and the Black Metal / Gorgoroth palette.
 
@@ -50,6 +51,35 @@ command = "herdr-sessionizer"   # symlinked onto PATH by scripts/link-configs.sh
 description = "project launcher (fzf → workspace)"
 width = "80%"
 height = "80%"
+
+# prefix Shift+H/J/K/L — swap the focused pane with its neighbor in that
+# direction (tmux-style pane rearrange; herdr ships no swap binding by default).
+# Mirrors focus_pane_* (prefix+h/j/k/l moves focus; add Shift to move the pane).
+# type = "shell" runs detached so no popup/pane flashes; --current resolves to
+# the focused pane. Swap targets: h=left, j=down, k=up, l=right.
+[[keys.command]]
+key = "prefix+shift+h"
+type = "shell"
+command = "herdr pane swap --direction left --current"
+description = "swap pane left"
+
+[[keys.command]]
+key = "prefix+shift+j"
+type = "shell"
+command = "herdr pane swap --direction down --current"
+description = "swap pane down"
+
+[[keys.command]]
+key = "prefix+shift+k"
+type = "shell"
+command = "herdr pane swap --direction up --current"
+description = "swap pane up"
+
+[[keys.command]]
+key = "prefix+shift+l"
+type = "shell"
+command = "herdr pane swap --direction right --current"
+description = "swap pane right"
 
 [ui.toast]
 delivery = "system"

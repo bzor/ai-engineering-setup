@@ -31,7 +31,10 @@ fi
 
 # --- project discovery: same roots as tmux-sessionizer -----------------------
 ROOTS=("$HOME/Projects" "$HOME/Repos")
-CONTAINERS=("$HOME/Repos/bzor-ads")
+CONTAINERS=(
+  "$HOME/Repos/bzor-ads"
+  "$HOME/Repos/ad-dev"
+)
 
 list_projects() {
   find "${ROOTS[@]}" -mindepth 1 -maxdepth 1 -type d -not -name '.*' 2>/dev/null

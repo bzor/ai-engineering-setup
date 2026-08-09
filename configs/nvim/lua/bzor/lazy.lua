@@ -140,11 +140,46 @@ require("lazy").setup({
       build = ":TSUpdate",
       config = function()
         require("nvim-treesitter.configs").setup({
-          ensure_installed = { "glsl", "lua", "javascript", "typescript", "tsx" },
+          ensure_installed = { "glsl", "lua", "javascript", "typescript", "tsx", "markdown", "markdown_inline" },
           auto_install = true,
           highlight = { enable = true },
           indent = { enable = true },
         })
+      end,
+    },
+
+    {
+      "3rd/image.nvim",
+      build = false, -- magick_cli processor: no luarocks build needed
+      opts = {
+        backend = "kitty", -- kitty graphics protocol (works in kitty + wezterm)
+        processor = "magick_cli", -- shells out to ImageMagick; avoids the luarocks magick rock
+        integrations = {
+          markdown = {
+            enabled = true,
+            only_render_image_at_cursor = false,
+          },
+        },
+      },
+    },
+
+    {
+      "3rd/diagram.nvim",
+      dependencies = { "3rd/image.nvim" },
+      ft = { "markdown" }, -- renders ```mermaid blocks inside markdown buffers
+      opts = function()
+        return {
+          integrations = {
+            require("diagram.integrations.markdown"),
+          },
+          renderer_options = {
+            mermaid = {
+              theme = "dark", -- matches the black-metal colorscheme
+              background = "transparent",
+              scale = 2, -- crisper on hidpi
+            },
+          },
+        }
       end,
     },
   },

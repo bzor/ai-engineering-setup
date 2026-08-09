@@ -29,7 +29,7 @@ sketchybar --default \
 # Names are per POSITION: space 1 = leftmost, and so on. macOS won't enforce
 # what actually runs where — these are just labels for what each slot is *for*.
 # Edit the array to rename; a space only draws once it exists in Mission Control.
-SPACE_NAMES=(work music web media notes scratch misc)
+SPACE_NAMES=(work email music web notes scratch misc)
 
 sid=1
 for name in "${SPACE_NAMES[@]}"; do

@@ -13,7 +13,10 @@ fi
 # Where to look for projects: top level of each root, plus one level deeper
 # inside "container" repos that hold many sub-projects.
 ROOTS=("$HOME/Projects" "$HOME/Repos")
-CONTAINERS=("$HOME/Repos/bzor-ads")
+CONTAINERS=(
+  "$HOME/Repos/bzor-ads"
+  "$HOME/Repos/ad-dev"
+)
 
 list_projects() {
   find "${ROOTS[@]}" -mindepth 1 -maxdepth 1 -type d -not -name '.*' 2>/dev/null
