@@ -1,0 +1,40 @@
+onboarding = false
+
+[terminal]
+default_shell = "pwsh.exe"
+shell_mode = "non_login"
+
+[keys]
+prefix = "ctrl+space"
+split_vertical = "prefix+|"
+previous_workspace = "alt+k"
+next_workspace = "alt+j"
+
+[theme]
+name = "terminal"
+
+[theme.custom]
+panel_bg = "#121212"
+accent = "#5f8787"
+red = "#a06666"
+green = "#5f8787"
+blue = "#5f8787"
+yellow = "#999999"
+overlay0 = "#6a6a6a"
+
+[[keys.command]]
+key = "prefix+f"
+type = "popup"
+command = "herdr-sessionizer.cmd"
+description = "project launcher (fzf to workspace)"
+width = "80%"
+height = "80%"
+
+[ui.toast]
+delivery = "system"
+
+[ui]
+host_cursor = "drawn"
+pane_borders = true
+pane_gaps = false
+show_agent_labels_on_pane_borders = true

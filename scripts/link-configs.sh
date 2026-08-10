@@ -22,10 +22,20 @@ link_dir "$REPO_DIR/configs/nvim" "$HOME/.config/nvim"
 link_dir "$REPO_DIR/configs/kitty" "$HOME/.config/kitty"
 link_dir "$REPO_DIR/configs/sketchybar" "$HOME/.config/sketchybar"
 
+# yazi: link individual config files so its runtime/package directories remain local.
+mkdir -p "$HOME/.config/yazi"
+ln -sf "$REPO_DIR/configs/yazi/theme.toml" "$HOME/.config/yazi/theme.toml"
+ln -sf "$REPO_DIR/configs/yazi/yazi.toml" "$HOME/.config/yazi/yazi.toml"
+
 # herdr: link the config FILE, not the dir — herdr keeps its sockets, logs and
 # session.json in ~/.config/herdr alongside it.
 mkdir -p "$HOME/.config/herdr"
 ln -sf "$REPO_DIR/configs/herdr/config.toml" "$HOME/.config/herdr/config.toml"
+
+# claude code: link the settings FILE, not the dir — Claude stores sessions,
+# projects, credentials in ~/.claude alongside it.
+mkdir -p "$HOME/.claude"
+ln -sf "$REPO_DIR/configs/claude/settings.json" "$HOME/.claude/settings.json"
 
 # helper scripts onto PATH
 mkdir -p "$HOME/.local/bin"

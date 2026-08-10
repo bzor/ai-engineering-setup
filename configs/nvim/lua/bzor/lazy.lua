@@ -1,5 +1,8 @@
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+local is_windows = vim.fn.has("win32") == 1
+local has_c_compiler = vim.fn.executable("cl") == 1 or vim.fn.executable("gcc") == 1
+  or vim.fn.executable("clang") == 1 or vim.fn.executable("zig") == 1
 
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = "https://github.com/folke/lazy.nvim.git"
@@ -97,7 +100,16 @@ require("lazy").setup({
         "nvim-lua/plenary.nvim",
         {
           "nvim-telescope/telescope-fzf-native.nvim",
-          build = "make",
+          cond = function()
+            if is_windows then
+              return vim.fn.executable("cmake") == 1 and
+                (vim.fn.executable("cl") == 1 or vim.fn.executable("gcc") == 1 or vim.fn.executable("clang") == 1)
+            end
+            return vim.fn.executable("make") == 1
+          end,
+          build = is_windows
+              and "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release"
+            or "make",
         },
       },
       config = function()
@@ -140,8 +152,10 @@ require("lazy").setup({
       build = ":TSUpdate",
       config = function()
         require("nvim-treesitter.configs").setup({
-          ensure_installed = { "glsl", "lua", "javascript", "typescript", "tsx", "markdown", "markdown_inline" },
-          auto_install = true,
+          ensure_installed = (not is_windows or has_c_compiler)
+              and { "glsl", "lua", "javascript", "typescript", "tsx", "markdown", "markdown_inline" }
+            or {},
+          auto_install = not is_windows or has_c_compiler,
           highlight = { enable = true },
           indent = { enable = true },
         })
@@ -152,7 +166,7 @@ require("lazy").setup({
       "3rd/image.nvim",
       build = false, -- magick_cli processor: no luarocks build needed
       opts = {
-        backend = "kitty", -- kitty graphics protocol (works in kitty + wezterm)
+        backend = "kitty", -- graphics protocol supported by WezTerm; Kitty is macOS/Linux-only here
         processor = "magick_cli", -- shells out to ImageMagick; avoids the luarocks magick rock
         integrations = {
           markdown = {

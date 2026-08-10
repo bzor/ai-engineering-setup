@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>name</key><string>Black Metal (Gorgoroth)</string>
+  <key>settings</key>
+  <array>
+    <dict><key>settings</key><dict>
+      <key>background</key><string>#000000</string>
+      <key>caret</key><string>#C1C1C1</string>
+      <key>foreground</key><string>#C1C1C1</string>
+      <key>invisibles</key><string>#333333</string>
+      <key>lineHighlight</key><string>#121212</string>
+      <key>selection</key><string>#222222</string>
+    </dict></dict>
+    <dict><key>name</key><string>Comments</string><key>scope</key><string>comment, punctuation.definition.comment</string><key>settings</key><dict><key>foreground</key><string>#333333</string></dict></dict>
+    <dict><key>name</key><string>Strings</string><key>scope</key><string>string, punctuation.definition.string</string><key>settings</key><dict><key>foreground</key><string>#9B8D7F</string></dict></dict>
+    <dict><key>name</key><string>Numbers and constants</string><key>scope</key><string>constant.numeric, constant.language, constant.character, constant.other</string><key>settings</key><dict><key>foreground</key><string>#AAAAAA</string></dict></dict>
+    <dict><key>name</key><string>Keywords and storage</string><key>scope</key><string>keyword, storage, storage.type, storage.modifier</string><key>settings</key><dict><key>foreground</key><string>#999999</string></dict></dict>
+    <dict><key>name</key><string>Functions</string><key>scope</key><string>entity.name.function, support.function, meta.function-call</string><key>settings</key><dict><key>foreground</key><string>#888888</string></dict></dict>
+    <dict><key>name</key><string>Types and classes</string><key>scope</key><string>entity.name.type, entity.name.class, support.type, support.class</string><key>settings</key><dict><key>foreground</key><string>#8C7F70</string></dict></dict>
+    <dict><key>name</key><string>Variables and parameters</string><key>scope</key><string>variable, variable.parameter, entity.name.variable</string><key>settings</key><dict><key>foreground</key><string>#C1C1C1</string></dict></dict>
+    <dict><key>name</key><string>Tags</string><key>scope</key><string>entity.name.tag, punctuation.definition.tag</string><key>settings</key><dict><key>foreground</key><string>#5F8787</string></dict></dict>
+    <dict><key>name</key><string>Attributes and properties</string><key>scope</key><string>entity.other.attribute-name, support.type.property-name, meta.object-literal.key</string><key>settings</key><dict><key>foreground</key><string>#AAAAAA</string></dict></dict>
+    <dict><key>name</key><string>Invalid</string><key>scope</key><string>invalid, invalid.illegal</string><key>settings</key><dict><key>background</key><string>#5F8787</string><key>foreground</key><string>#000000</string></dict></dict>
+    <dict><key>name</key><string>Inserted</string><key>scope</key><string>markup.inserted</string><key>settings</key><dict><key>foreground</key><string>#9B8D7F</string></dict></dict>
+    <dict><key>name</key><string>Deleted</string><key>scope</key><string>markup.deleted</string><key>settings</key><dict><key>foreground</key><string>#5F8787</string></dict></dict>
+    <dict><key>name</key><string>Changed</string><key>scope</key><string>markup.changed</string><key>settings</key><dict><key>foreground</key><string>#8C7F70</string></dict></dict>
+  </array>
+  <key>uuid</key><string>9A0EE63B-D228-44DD-A990-B16B1AC0F07A</string>
+</dict>
+</plist>

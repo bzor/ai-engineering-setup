@@ -1,5 +1,16 @@
 # Native Windows Engineering Environment Plan
 
+## Execution status (2026-08-09)
+
+- [x] Phase 1 inventory completed; no unmanaged user configuration conflicts found.
+- [x] Phases 2-6 repository layer, bootstrap, safe linking, PowerShell profile, and cross-platform WezTerm configuration completed.
+- [x] Phase 7 native Neovim installed, synchronized, and checked headlessly; compiler-dependent enhancements remain optional and are documented.
+- [x] Phase 8 Herdr Windows preview installed with Codex integration; config validates and Windows beta limitations are documented.
+- [x] Phase 9 Houdini discovery/wrapper completed and version-only check passed with Houdini 22.0.368 selected.
+- [x] Phase 9 license-consuming scene smoke test approved and passed with Houdini 22.0.368.
+- [x] Phase 10 documentation and read-only health check completed.
+- [x] Final safe command-line verification completed; interactive WezTerm/Herdr use remains a manual visual check.
+
 ## Launch prompt
 
 After cloning this repository onto the Windows PC, open the repository in Codex and send:

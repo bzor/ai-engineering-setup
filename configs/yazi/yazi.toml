@@ -1,0 +1,13 @@
+[opener]
+edit = [
+    { run = '$EDITOR %s', desc = "nvim", block = true, for = "unix" },
+    { run = 'nvim %s', desc = "nvim", block = true, for = "windows" },
+]
+
+[open]
+# Prepend so these win over yazi's built-in rules; the defaults still apply below.
+prepend_rules = [
+    { url = "*.md", use = "edit" },
+    { url = "*.markdown", use = "edit" },
+    { url = "*.mdx", use = "edit" },
+]
