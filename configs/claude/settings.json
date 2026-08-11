@@ -1,3 +1,8 @@
 {
-  "theme": "dark-ansi"
+  "theme": "dark-ansi",
+  "statusLine": {
+    "type": "command",
+    "command": "ai-usage-collector.cmd --claude-status-line",
+    "padding": 0
+  }
 }

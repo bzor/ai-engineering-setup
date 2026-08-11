@@ -9,6 +9,7 @@ Core tools:
 - Neovim
 - Claude Code
 - Codex
+- Zebar usage widget on Windows
 - PowerShell 7 on Windows; zsh on macOS
 - winget on Windows; Homebrew on macOS
 
@@ -34,7 +35,24 @@ notes/      scratch notes
 
 ## Platforms
 
-- Windows 11: WezTerm → PowerShell 7 → Herdr → Neovim + native Codex → Houdini. See [install/windows.md](install/windows.md).
-- macOS: the existing shell, tmux, Kitty, and Sketchybar files remain available as legacy/macOS-specific configuration.
+- Windows 11: WezTerm → PowerShell 7 → Herdr → Neovim + native Codex → Houdini, with an optional Zebar Codex/Claude usage widget. See [install/windows.md](install/windows.md).
+- macOS: zsh → Kitty or WezTerm → tmux/Herdr → Neovim. See [install/macos.md](install/macos.md).
 
 Windows setup never requires WSL, tmux, or Kitty. WezTerm is the Windows terminal and Herdr is the only active Windows multiplexer.
+
+## Quick start
+
+On Windows, open PowerShell 7 in the cloned repository:
+
+```powershell
+pwsh -NoProfile -File .\scripts\bootstrap-windows.ps1
+pwsh -NoProfile -File .\scripts\link-configs-windows.ps1
+pwsh -NoProfile -File .\scripts\check-health-windows.ps1
+```
+
+On macOS, see the manual prerequisites and linking caveats in
+[install/macos.md](install/macos.md) before running the scripts.
+
+Daily commands and keybindings are collected in
+[docs/cheatsheets/main.md](docs/cheatsheets/main.md). Project and agent routines
+live under [docs/workflows](docs/workflows).

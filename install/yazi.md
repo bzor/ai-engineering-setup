@@ -1,6 +1,7 @@
 # Yazi
 
-Yazi is a terminal file manager. I’m using it as a fast file browser from WezTerm/tmux, and eventually from inside Neovim.
+Yazi is a terminal file manager used from WezTerm, Kitty, tmux/Herdr, and inside
+Neovim.
 
 ## Install
 

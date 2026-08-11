@@ -16,11 +16,11 @@ function Set-ManagedTarget([string]$Source, [string]$Destination, [switch]$Direc
         if ($sameLink) { Write-Host "linked: $Destination"; return }
         if (-not (Test-Path -LiteralPath $marker)) { throw "Refusing to overwrite unmanaged target: $Destination" }
         $unchanged = if ($Directory) {
-            $sourceFiles = @(Get-ChildItem -LiteralPath $Source -File -Recurse | ForEach-Object {
+            $sourceFiles = @(Get-ChildItem -LiteralPath $Source -File -Recurse | Where-Object Name -NE 'usage.json' | ForEach-Object {
                 $relative = [IO.Path]::GetRelativePath($Source, $_.FullName)
                 "$relative|$((Get-FileHash -LiteralPath $_.FullName).Hash)"
             })
-            $targetFiles = @(Get-ChildItem -LiteralPath $Destination -File -Recurse | Where-Object Name -NE $managedMarker | ForEach-Object {
+            $targetFiles = @(Get-ChildItem -LiteralPath $Destination -File -Recurse | Where-Object { $_.Name -notin @($managedMarker, 'usage.json') } | ForEach-Object {
                 $relative = [IO.Path]::GetRelativePath($Destination, $_.FullName)
                 "$relative|$((Get-FileHash -LiteralPath $_.FullName).Hash)"
             })
@@ -50,6 +50,20 @@ Set-ManagedTarget (Join-Path $repo 'configs\nvim') (Join-Path $env:LOCALAPPDATA 
 Set-ManagedTarget (Join-Path $repo 'configs\powershell\Microsoft.PowerShell_profile.ps1') $PROFILE.CurrentUserCurrentHost
 Set-ManagedTarget (Join-Path $repo 'configs\herdr\config.windows.toml') (Join-Path $env:APPDATA 'herdr\config.toml')
 Set-ManagedTarget (Join-Path $repo 'configs\claude\settings.json') (Join-Path $HOME '.claude\settings.json')
+$zebarRoot = Join-Path $HOME '.glzr\zebar'
+$zebarTarget = Join-Path $zebarRoot 'ai-usage-bar'
+Set-ManagedTarget (Join-Path $repo 'configs\zebar\ai-usage-bar') $zebarTarget -Directory
+# Zebar treats every direct child of its config root as a widget pack. Preserve
+# managed backups outside that scan root so stale copies cannot launch.
+$zebarBackupRoot = Join-Path $HOME '.glzr\config-backups\zebar'
+$zebarBackups = @(Get-ChildItem -LiteralPath $zebarRoot -Directory -Filter 'ai-usage-bar.backup-*' -ErrorAction SilentlyContinue)
+if ($zebarBackups.Count) {
+    New-Item -ItemType Directory -Path $zebarBackupRoot -Force | Out-Null
+    foreach ($backup in $zebarBackups) {
+        Move-Item -LiteralPath $backup.FullName -Destination $zebarBackupRoot
+        Write-Host "moved Zebar backup outside widget scan root: $($backup.Name)"
+    }
+}
 $yaziConfig = if ($env:YAZI_CONFIG_HOME) { $env:YAZI_CONFIG_HOME } else { Join-Path $env:APPDATA 'yazi\config' }
 Set-ManagedTarget (Join-Path $repo 'configs\yazi\theme.toml') (Join-Path $yaziConfig 'theme.toml')
 Set-ManagedTarget (Join-Path $repo 'configs\yazi\yazi.toml') (Join-Path $yaziConfig 'yazi.toml')

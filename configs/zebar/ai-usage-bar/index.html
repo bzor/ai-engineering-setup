@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root { color-scheme: dark; font-family: "IosevkaTerm NF", "Cascadia Mono", monospace; font-size: 12px; font-weight: 300; }
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; color: #ddd; }
+    /* No group chrome: the docked strip is reserved desktop space, so the bar
+       reads as part of the desktop and grouping is carried by spacing alone. */
+    #bar { height: 42px; display: flex; justify-content: flex-end; align-items: center; gap: 26px; padding: 0 14px; text-shadow: 0 1px 2px rgba(0,0,0,.85); }
+    .group { height: 34px; display: flex; align-items: center; gap: 8px; }
+    .brand { font-weight: 500; color: #fff; }
+    .clock { gap: 7px; }
+    .clock .date { color: #989898; }
+    .clock .time { color: #fff; font-weight: 500; }
+    /* Each metric stacks its text over a meter, so the meter inherits the
+       exact width of the text above it. */
+    .metric { display: inline-flex; flex-direction: column; justify-content: center; gap: 3px; color: #c8c8c8; }
+    .row { white-space: nowrap; }
+    .meter { height: 2px; background: #2e2e2e; }
+    .fill { display: block; height: 100%; background: #e0e0e0; }
+    .percent { color: #fff; }
+    .reset { color: #989898; }
+    .warn .percent { color: #e6b450; }
+    .warn .fill { background: #e6b450; }
+    .critical .percent { color: #ff6b6b; }
+    .critical .fill { background: #ff6b6b; }
+    .dot { color: #5a5a5a; }
+    .empty { color: #777; }
+  </style>
+</head>
+<body>
+  <main id="bar"><div class="group empty">Loading AI usage…</div></main>
+  <script>
+    let state = null;
+    let offline = false;
+
+    function dayText(date) {
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
+
+    function timeText(date) {
+      const hours = date.getHours();
+      return `${hours % 12 || 12}:${String(date.getMinutes()).padStart(2, '0')}${hours < 12 ? 'am' : 'pm'}`;
+    }
+
+    // Short windows only get a countdown; the wall-clock date is noise when the
+    // reset is a few hours out.
+    function resetText(epochSeconds, withDate) {
+      if (!epochSeconds) return 'reset unknown';
+      const remaining = epochSeconds * 1000 - Date.now();
+      if (remaining <= 0) return '↻';
+      const minutes = Math.ceil(remaining / 60000);
+      const days = Math.floor(minutes / 1440);
+      const hours = Math.floor((minutes % 1440) / 60);
+      const mins = minutes % 60;
+      const countdown = days ? `${days}d ${hours}h` : hours ? `${hours}h ${mins}m` : `${mins}m`;
+      if (!withDate) return countdown;
+      const reset = new Date(epochSeconds * 1000);
+      return `${countdown} · ${dayText(reset)} ${timeText(reset)}`;
+    }
+
+    function metric(label, value, withDate = true) {
+      if (!value) return `<span class="metric empty"><span class="row">${label} unavailable</span></span>`;
+      const used = Math.round(value.usedPercent ?? 0);
+      const severity = used >= 90 ? 'critical' : used >= 70 ? 'warn' : '';
+      const fill = Math.max(0, Math.min(100, used));
+      return `<span class="metric ${severity}">`
+        + `<span class="row">${label} <span class="percent">${used}% used</span> <span class="reset">(${resetText(value.resetsAt, withDate)})</span></span>`
+        + `<span class="meter"><span class="fill" style="width: ${fill}%"></span></span>`
+        + `</span>`;
+    }
+
+    // The clock stands in for the hidden taskbar, so it renders even when the
+    // collector is down and the usage groups have nothing to show.
+    function render() {
+      const now = new Date();
+      const usage = state
+        ? `<section class="group"><span class="brand">Codex</span>${metric('7d', state.codex?.primary)}</section>
+           <section class="group"><span class="brand">Claude</span>${metric('5h', state.claude?.fiveHour, false)}<span class="dot">•</span>${metric('7d', state.claude?.sevenDay)}</section>`
+        : `<section class="group empty">${offline ? 'AI usage collector offline' : 'Loading AI usage…'}</section>`;
+      document.getElementById('bar').innerHTML = `${usage}
+        <section class="group clock"><span class="date">${dayText(now)}</span><span class="time">${timeText(now)}</span></section>`;
+    }
+
+    async function refresh() {
+      try {
+        const response = await fetch(`usage.json?t=${Date.now()}`, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`${response.status}`);
+        state = await response.json();
+        offline = false;
+      } catch {
+        state = null;
+        offline = true;
+      }
+      render();
+    }
+
+    refresh();
+    setInterval(refresh, 15000);
+    setInterval(render, 1000);
+  </script>
+</body>
+</html>

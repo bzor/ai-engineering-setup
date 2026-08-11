@@ -3,8 +3,9 @@
 herdr is a terminal multiplexer that understands coding agents — "tmux, but
 agent-aware." It shows each agent's state (`blocked` / `working` / `done` /
 `idle`) in a sidebar, so I can run several long tasks in parallel and check in
-on each without hunting through windows. Trialing it alongside tmux; setup
-notes live in `install/herdr.md`.
+on each without hunting through windows. It is the active Windows multiplexer;
+macOS retains both the Herdr and tmux workflows. Setup notes live in
+[`install/herdr.md`](../../install/herdr.md).
 
 The mental model — one row per project in the sidebar, each a **workspace**:
 
@@ -23,28 +24,31 @@ capacity *within* a project.
 
 ## The lineup (`herdr-work`)
 
-The everyday environment is built by one script, `configs/herdr/herdr-work.sh`
-(on PATH as `herdr-work`), the herdr analog of `tmux-work`:
+The everyday environment is built by `herdr-work`. On macOS this resolves to
+`configs/herdr/herdr-work.sh`; on Windows it resolves through a `.cmd` shim to
+`configs/herdr/herdr-work.ps1`:
 
 ```bash
 herdr-work
 ```
 
-It opens every project in the script's `PROJECTS` array as a workspace, each
+It opens every configured active project as a workspace, each
 laid out with nvim, a spare terminal, and a claude shell, then focuses the
 first. Unlike the launcher below it does **not** auto-start `claude` in each —
 that would spawn one agent per project; the bottom-right pane is left as a
 shell, type `claude` in the ones you want. Safe to re-run: projects already
 open are left as-is (matched by label), so it both builds and tops up the
-lineup. Edit the `PROJECTS` array to change the everyday set.
+lineup. Edit the shell script's `PROJECTS` array on macOS or
+`configs/herdr/projects.windows.psd1` on Windows to change the everyday set.
 
-Needs a running herdr server (`herdr` first) plus `jq`. Because herdr drives
+Needs a running Herdr server (`herdr` first). The macOS script also needs `jq`;
+the Windows script uses PowerShell's JSON support. Because Herdr drives
 over its socket, `herdr-work` works from any shell — inside a pane or out.
 
 ## Project launcher (`prefix f`)
 
 For anything not in the lineup, `prefix f` opens a popup that fuzzy-picks any
-project under `~/Projects` or `~/Repos` and opens it as a workspace (jumping to
+project under the configured project roots and opens it as a workspace (jumping to
 it if already open). This is `configs/herdr/herdr-sessionizer.sh`, also on PATH
 as `herdr-sessionizer`. Same layout every time:
 
@@ -57,7 +61,8 @@ as `herdr-sessionizer`. Same layout every time:
 ```
 
 Unlike `herdr-work`, the launcher **does** start `claude` in the bottom-right
-pane — it's the "I want to work on this one now" path. Needs `fzf` + `jq`.
+pane — it's the "I want to work on this one now" path. It needs `fzf`; the
+macOS implementation also needs `jq`.
 
 ## Prefix key
 
@@ -67,8 +72,10 @@ My prefix is `Ctrl-Space`, matching tmux (herdr's own default is `Ctrl-b`):
 Ctrl-Space       then another key
 ```
 
-Set in `configs/herdr/config.toml`. Don't nest herdr inside tmux — the prefixes
-fight. Run herdr in its own kitty window.
+Set in `configs/herdr/config.toml` on macOS and
+`configs/herdr/config.windows.toml` on Windows. Don't nest Herdr inside tmux —
+the prefixes fight. Windows does not use tmux; on macOS, use separate terminal
+windows.
 
 ## Panes
 

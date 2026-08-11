@@ -17,6 +17,7 @@ $packages = @(
     @{ Name='zoxide'; Command='zoxide'; Id='ajeetdsouza.zoxide' },
     @{ Name='Yazi'; Command='yazi'; Id='sxyazi.yazi' },
     @{ Name='ImageMagick'; Command='magick'; Id='ImageMagick.ImageMagick' }
+    @{ Name='Zebar'; Command='zebar'; Id='glzr-io.zebar'; Scope='machine' }
 )
 $summary = [ordered]@{ Installed=@(); Present=@(); Skipped=@(); Failed=@() }
 foreach ($package in $packages) {
@@ -28,7 +29,8 @@ foreach ($package in $packages) {
     if ($WhatIf) { $summary.Skipped += "$($package.Name) (WhatIf)"; continue }
     # User scope prevents an implicit elevation request. Packages that do not
     # provide a user-scope installer fail visibly and can be approved manually.
-    winget install --id $package.Id --exact --source winget --scope user --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
+    $scope = if ($package.Scope) { $package.Scope } else { 'user' }
+    winget install --id $package.Id --exact --source winget --scope $scope --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
     if ($LASTEXITCODE -eq 0) { $summary.Installed += $package.Name } else { $summary.Failed += $package.Name }
 }
 

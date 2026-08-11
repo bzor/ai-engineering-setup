@@ -20,6 +20,84 @@ pwsh -NoProfile -File .\scripts\check-health-windows.ps1
 
 The bootstrap installs only missing stable winget packages. It deliberately leaves Herdr (Windows preview), Houdini, and the Iosevka Nerd Font for explicit/manual installation. Install Iosevka Term Nerd Font from the official Nerd Fonts Iosevka release, then restart WezTerm. Codex is supplied by the official native OpenAI Codex Windows app.
 
+## AI usage bar
+
+Zebar hosts a top-edge Codex and Claude usage widget. The Node collector
+(`scripts/ai-usage-collector.js`) queries Codex's local app-server once per minute.
+Claude Code sends its supported five-hour and seven-day rate-limit payload to the
+same cache through the configured status-line command, so Claude values populate
+after starting a Claude session. Both write `configs/zebar/ai-usage-bar/usage.json`,
+which is runtime state: it is git-ignored and excluded from the linker's
+change comparison.
+
+Start the collector and widget with:
+
+```powershell
+pwsh -NoProfile -File .\scripts\start-ai-usage-bar.ps1 -RegisterStartup
+```
+
+`-RegisterStartup` also creates a per-user Windows startup shortcut so the
+collector and Zebar return after signing out or rebooting. It is safe to run
+again; the shortcut is refreshed in place.
+
+### Placement
+
+The active preset is `top-right`, selected in `~/.glzr/zebar/settings.json`. It sets
+`dockToEdge` on the top edge, which registers the widget as a Windows appbar and
+reserves a 42px strip out of the desktop work area:
+
+```powershell
+Add-Type -AssemblyName System.Windows.Forms
+[System.Windows.Forms.Screen]::PrimaryScreen | Select-Object Bounds, WorkingArea
+# Bounds {Width=2560,Height=1600} / WorkingArea {Y=42,Height=1558} when docked
+```
+
+Docking, not `zOrder`, is what keeps the bar visible. `top_most` is best-effort and
+Windows demotes it — WezTerm in particular would cover the bar. Reserving work area
+means a maximized window cannot occupy those pixels at all. Windows already open
+when the reservation changes may need re-maximizing to pick it up; true fullscreen
+windows still cover the strip. A tiling window manager such as GlazeWM is not
+required for this, and would tile inside the reduced work area with no top gap
+configured. The undocked `bottom-right` preset is retained in `zpack.json`.
+
+### Readout
+
+Each metric shows percent used, a countdown to reset, and a 2px meter filled to the
+same percentage, coloured neutral below 70%, amber at 70%, red at 90%. The Claude
+five-hour window shows only a countdown; the seven-day windows add the local reset
+date in `M/D h:mmam` form. A clock sits at the right end, since the Windows taskbar
+is hidden — it renders even when the collector is down, so it never disappears with
+the usage groups.
+
+### Claude Code status line
+
+`configs/claude/settings.json` points `statusLine` at the same collector through
+`ai-usage-collector.cmd --claude-status-line`. Every render caches the rate-limit
+payload for the widget and prints the model, context percentage, and raw token
+count:
+
+```text
+Opus 5 (1M context) · ctx 4% · 42k/1M
+```
+
+The five-hour and seven-day percentages are deliberately not printed there; they
+are the widget's job, and duplicating them crowded the status line.
+
+### Editing the widget
+
+If `~/.glzr/zebar/ai-usage-bar` is a managed copy rather than a symbolic link,
+editing this repository does not update the running widget. Rerun
+`link-configs-windows.ps1`, then restart Zebar to reload:
+
+```powershell
+Get-Process zebar -ErrorAction SilentlyContinue | Stop-Process -Force
+pwsh -NoProfile -File .\scripts\start-ai-usage-bar.ps1
+```
+
+The linker also moves any timestamped backup out of `~/.glzr/zebar`, because Zebar
+treats every direct child of that directory as a widget pack and would otherwise
+offer a stale copy.
+
 The linker prefers symbolic links and falls back to marked managed copies. It refuses unmanaged targets. Managed targets are backed up with a timestamp before replacement. Re-running it does not duplicate the repository bin entry in the user PATH.
 
 ## Herdr Windows beta

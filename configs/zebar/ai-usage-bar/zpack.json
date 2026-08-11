@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/glzr-io/zebar/main/resources/zpack-schema.json",
+  "name": "ai-usage-bar",
+  "version": "1.0.0",
+  "description": "Codex and Claude rolling-limit usage with reset countdowns.",
+  "tags": ["usage", "codex", "claude"],
+  "widgets": [
+    {
+      "name": "ai-usage-bar",
+      "htmlPath": "./index.html",
+      "zOrder": "top_most",
+      "shownInTaskbar": false,
+      "focused": false,
+      "resizable": false,
+      "transparent": true,
+      "includeFiles": ["*.html", "usage.json"],
+      "presets": [
+        {
+          "name": "top-right",
+          "anchor": "top_right",
+          "offsetX": "0px",
+          "offsetY": "0px",
+          "width": "1200px",
+          "height": "42px",
+          "monitorSelection": { "type": "primary" },
+          "dockToEdge": { "enabled": true, "edge": "top", "windowMargin": "0px" }
+        },
+        {
+          "name": "bottom-right",
+          "anchor": "bottom_right",
+          "offsetX": "-10px",
+          "offsetY": "-54px",
+          "width": "1200px",
+          "height": "42px",
+          "monitorSelection": { "type": "primary" },
+          "dockToEdge": { "enabled": false, "edge": null, "windowMargin": "0px" }
+        }
+      ]
+    }
+  ]
+}

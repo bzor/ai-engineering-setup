@@ -6,3 +6,4 @@
 # local machine-specific notes
 notes/private.md
 local/
+configs/zebar/ai-usage-bar/usage.json

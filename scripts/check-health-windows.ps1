@@ -12,6 +12,7 @@ function Check-Command([string]$Name, [bool]$Required=$true) {
 }
 Write-Host "Windows $([Environment]::OSVersion.Version) / PowerShell $($PSVersionTable.PSVersion) $($PSVersionTable.PSEdition)"
 foreach ($name in 'pwsh','git','wezterm','nvim','node','npm','rg','fd','fzf','zoxide','yazi','magick','codex') { Check-Command $name }
+Check-Command zebar $false
 Check-Command herdr $false
 
 $targets = @(
@@ -19,6 +20,7 @@ $targets = @(
     @{ D=Join-Path $env:LOCALAPPDATA 'nvim'; S=Join-Path $repo 'configs\nvim' },
     @{ D=$PROFILE.CurrentUserCurrentHost; S=Join-Path $repo 'configs\powershell\Microsoft.PowerShell_profile.ps1' },
     @{ D=Join-Path $env:APPDATA 'herdr\config.toml'; S=Join-Path $repo 'configs\herdr\config.windows.toml' }
+    @{ D=Join-Path $HOME '.glzr\zebar\ai-usage-bar'; S=Join-Path $repo 'configs\zebar\ai-usage-bar' }
 )
 foreach ($target in $targets) {
     if (-not (Test-Path -LiteralPath $target.D)) { $requiredFailures.Add("Missing config target: $($target.D)"); continue }

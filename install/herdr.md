@@ -3,8 +3,8 @@
 Agent multiplexer — tmux, but it understands coding agents. Shows each agent's
 state at a glance (`blocked` / `working` / `done` / `idle`), so you can run
 several long tasks in parallel and check in on each without hunting through
-windows. Rust single binary, no Electron/account/telemetry. Trialing it
-alongside tmux to compare — not a replacement yet.
+windows. It is the active Windows multiplexer. The macOS tmux configuration is
+still retained, and Herdr can be used there as an alternative.
 
 ## Install
 
@@ -12,6 +12,10 @@ alongside tmux to compare — not a replacement yet.
 brew install herdr                    # homebrew/core, no tap needed
 herdr integration install claude      # richer Claude Code state + session resume
 ```
+
+Native Windows support is preview/beta. Follow the inspected-installer and
+limitations guidance in [windows.md](windows.md); the repository supplies a
+separate PowerShell config and launchers for that platform.
 
 The Claude integration adds a `SessionStart` hook to `~/.claude/settings.json`
 and drops `~/.claude/hooks/herdr-agent-state.sh`. The hook **no-ops unless run
@@ -57,7 +61,8 @@ disables just that binding rather than failing the whole config.
 
 ## Project launcher (prefix f)
 
-`configs/herdr/herdr-sessionizer.sh` is the herdr analog of `tmux-sessionizer`.
+On macOS, `configs/herdr/herdr-sessionizer.sh` is the Herdr analog of
+`tmux-sessionizer`.
 It fuzzy-picks a project (same roots as the tmux one) and opens it as a
 **workspace** — reusing it if already open — with the familiar layout:
 
@@ -79,8 +84,8 @@ drives herdr over the socket, so it works from any shell — no "am I inside it"
 Our tmux accepts *both* `Ctrl-Space` (prefix) and `Ctrl-b` (prefix2) — which is
 herdr's default prefix and our chosen one respectively, so there is no prefix
 herdr could use that tmux doesn't already claim. Don't nest herdr inside tmux or
-the prefixes fight. For the trial, run herdr in its **own kitty window**,
-separate from tmux.
+the prefixes fight. On macOS, run Herdr in its own terminal window, separate
+from tmux. Windows does not use tmux.
 
 ## Uninstall / back out
 
