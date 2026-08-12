@@ -33,9 +33,11 @@ mkdir -p "$HOME/.config/herdr"
 ln -sf "$REPO_DIR/configs/herdr/config.toml" "$HOME/.config/herdr/config.toml"
 
 # claude code: link the settings FILE, not the dir — Claude stores sessions,
-# projects, credentials in ~/.claude alongside it.
+# projects, credentials in ~/.claude alongside it. macOS gets its own copy:
+# the hooks and statusLine point at bash scripts that don't exist on Windows,
+# so a single shared file would break one side or the other.
 mkdir -p "$HOME/.claude"
-ln -sf "$REPO_DIR/configs/claude/settings.json" "$HOME/.claude/settings.json"
+ln -sf "$REPO_DIR/configs/claude/settings.macos.json" "$HOME/.claude/settings.json"
 
 # helper scripts onto PATH
 mkdir -p "$HOME/.local/bin"
@@ -43,5 +45,7 @@ ln -sf "$REPO_DIR/configs/tmux/tmux-work.sh" "$HOME/.local/bin/tmux-work"
 ln -sf "$REPO_DIR/configs/tmux/tmux-sessionizer.sh" "$HOME/.local/bin/tmux-sessionizer"
 ln -sf "$REPO_DIR/configs/herdr/herdr-sessionizer.sh" "$HOME/.local/bin/herdr-sessionizer"
 ln -sf "$REPO_DIR/configs/herdr/herdr-work.sh" "$HOME/.local/bin/herdr-work"
+# pointed at by statusLine.command in ~/.claude/settings.json
+ln -sf "$REPO_DIR/configs/claude/statusline.sh" "$HOME/.local/bin/claude-statusline"
 
 echo "Linked configs from $REPO_DIR"
