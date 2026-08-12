@@ -10,10 +10,16 @@ FG=0xffc1c1c1      # default text
 DIM=0xff505050     # inactive / separators
 ACCENT=0xff5f8787  # active space (gorgoroth teal)
 
+# notch_width is this machine's actual notch (NSScreen leaves 771pt to its left
+# and 772pt to its right of 1728). It only keeps *centered* items out of the
+# notch — left/right items are laid out from the screen edges and ignore it, so
+# a long right-hand group still slides under the notch on its own. Sized for
+# that separately, below.
 sketchybar --bar \
   height=26 \
   color=$BG \
   position=top \
+  notch_width=185 \
   padding_left=6 \
   padding_right=6
 
@@ -53,5 +59,55 @@ sketchybar --add item volume right \
 sketchybar --add item battery right \
   --set battery update_freq=120 script="$PLUGIN_DIR/battery.sh" \
   --subscribe battery system_woke power_source_change
+
+# --- Right: AI plan usage (left of the battery) ---
+# "codex 7d 3% [4d 1hr]  claude 5h 15% [1h 38m]  7d 2% [6d 17hr]" — percent of
+# each rate-limit window burned, with time left on it. codex reads its own
+# session logs; claude is fed by the statusline hook in
+# configs/claude/statusline.sh.
+#
+# A label takes exactly one font, so bolding just the percentages means one
+# item per piece: a name, then a bold stat + regular countdown per window.
+# Slots are built empty and hidden here; the plugin on the name item fills in
+# however many windows that provider actually reports (see render_group in
+# plugins/usage_fmt.sh, which owns USAGE_SLOTS).
+#
+# Right-aligned items lay out right-to-left in the order they're added, hence
+# the reversed loop and building claude first — codex ends up leftmost, with
+# the separator dot added between the two groups.
+#
+# It all has to stay right of the notch (see notch_width above); at 13pt this
+# fits only because the labels stop at the countdown. After changing the
+# format, check it still clears:
+#   sketchybar --query codex_name | jq '.bounding_rects[].origin[0]'  # want > 956
+source "$PLUGIN_DIR/usage_fmt.sh"
+USAGE_BOLD="IosevkaTerm Nerd Font Mono:Bold:13.0"
+
+add_usage_group() {
+  local provider=$1 slot
+  for (( slot = USAGE_SLOTS; slot >= 1; slot-- )); do
+    sketchybar --add item ${provider}_w${slot}_time right \
+      --set ${provider}_w${slot}_time drawing=off icon.drawing=off \
+        label.padding_right=2
+    sketchybar --add item ${provider}_w${slot}_stat right \
+      --set ${provider}_w${slot}_stat drawing=off icon.drawing=off \
+        label.font="$USAGE_BOLD" label.padding_right=3
+  done
+  sketchybar --add item ${provider}_name right \
+    --set ${provider}_name update_freq=60 drawing=off icon.drawing=off \
+      label.padding_left=4 label.padding_right=2 \
+      script="$PLUGIN_DIR/${provider}_usage.sh"
+}
+
+add_usage_group claude
+sketchybar --add item usage_sep right \
+  --set usage_sep drawing=off icon.drawing=off \
+    label="·" label.color=$USAGE_MUTED \
+    label.padding_left=8 label.padding_right=6
+add_usage_group codex
+
+# The group's own padding is deliberately tight, so the breathing room before
+# the battery has to come from the battery's side.
+sketchybar --set battery icon.padding_left=10
 
 sketchybar --update
