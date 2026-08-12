@@ -9,33 +9,53 @@
     body { margin: 0; overflow: hidden; color: #ddd; }
     /* No group chrome: the docked strip is reserved desktop space, so the bar
        reads as part of the desktop and grouping is carried by spacing alone. */
-    #bar { height: 42px; display: flex; justify-content: flex-end; align-items: center; gap: 26px; padding: 0 14px; text-shadow: 0 1px 2px rgba(0,0,0,.85); }
+    #bar { height: 42px; display: flex; justify-content: space-between; align-items: center; padding: 0 14px; text-shadow: 0 1px 2px rgba(0,0,0,.85); }
+    .zone { display: flex; align-items: center; gap: 26px; }
     .group { height: 34px; display: flex; align-items: center; gap: 8px; }
-    .brand { font-weight: 500; color: #fff; }
-    .clock { gap: 7px; }
-    .clock .date { color: #989898; }
-    .clock .time { color: #fff; font-weight: 500; }
+    /* Brands read as labels, matching the vitals labels on the left. */
+    .brand { color: #8a8a8a; }
     /* Each metric stacks its text over a meter, so the meter inherits the
-       exact width of the text above it. */
+       exact width of the text above it. Meters are reserved for windows that
+       deplete and reset; instantaneous vitals stay plain text. */
     .metric { display: inline-flex; flex-direction: column; justify-content: center; gap: 3px; color: #c8c8c8; }
     .row { white-space: nowrap; }
     .meter { height: 2px; background: #2e2e2e; }
     .fill { display: block; height: 100%; background: #e0e0e0; }
     .percent { color: #fff; }
     .reset { color: #989898; }
-    .warn .percent { color: #e6b450; }
+    .warn .percent, .warn .val { color: #e6b450; }
     .warn .fill { background: #e6b450; }
-    .critical .percent { color: #ff6b6b; }
+    .critical .percent, .critical .val { color: #ff6b6b; }
     .critical .fill { background: #ff6b6b; }
     .dot { color: #5a5a5a; }
     .empty { color: #777; }
+    .vital { white-space: nowrap; color: #c8c8c8; }
+    .vital .lbl { color: #8a8a8a; }
+    .vital .val { color: #fff; }
+    .dots { letter-spacing: 1px; }
+    .dots .on { color: #e0e0e0; }
+    .dots .off { color: #555; }
+    .clock { gap: 7px; }
+    .clock .date { color: #989898; }
+    .clock .time { color: #fff; font-weight: 500; }
   </style>
 </head>
 <body>
-  <main id="bar"><div class="group empty">Loading AI usage…</div></main>
-  <script>
+  <main id="bar">
+    <div class="zone" id="vitals"></div>
+    <div class="zone" id="usage"></div>
+  </main>
+  <script type="module">
     let state = null;
     let offline = false;
+    let vitals = {};
+    let netRate = null;
+    let netSample = null;
+
+    // Matches the collector's own session TTL; a session that has not rendered
+    // its status line for a couple of minutes is open but not working.
+    const sessionActiveMs = 2 * 60_000;
+    const sessionIdleMs = 10 * 60_000;
 
     function dayText(date) {
       return `${date.getMonth() + 1}/${date.getDate()}`;
@@ -46,8 +66,19 @@
       return `${hours % 12 || 12}:${String(date.getMinutes()).padStart(2, '0')}${hours < 12 ? 'am' : 'pm'}`;
     }
 
-    // Short windows only get a countdown; the wall-clock date is noise when the
-    // reset is a few hours out.
+    function severity(percent) {
+      return percent >= 90 ? 'critical' : percent >= 70 ? 'warn' : '';
+    }
+
+    function windowLabel(minutes) {
+      if (!Number.isFinite(minutes)) return '?';
+      if (minutes < 60) return `${minutes}m`;
+      if (minutes < 1440) return `${Math.round(minutes / 60)}h`;
+      return `${Math.round(minutes / 1440)}d`;
+    }
+
+    // Sub-day windows reset today, so a countdown says everything; only longer
+    // windows earn the wall-clock date.
     function resetText(epochSeconds, withDate) {
       if (!epochSeconds) return 'reset unknown';
       const remaining = epochSeconds * 1000 - Date.now();
@@ -62,27 +93,128 @@
       return `${countdown} · ${dayText(reset)} ${timeText(reset)}`;
     }
 
-    function metric(label, value, withDate = true) {
-      if (!value) return `<span class="metric empty"><span class="row">${label} unavailable</span></span>`;
+    function metric(value) {
       const used = Math.round(value.usedPercent ?? 0);
-      const severity = used >= 90 ? 'critical' : used >= 70 ? 'warn' : '';
       const fill = Math.max(0, Math.min(100, used));
-      return `<span class="metric ${severity}">`
+      const label = windowLabel(value.windowDurationMins);
+      const withDate = (value.windowDurationMins ?? 0) >= 1440;
+      return `<span class="metric ${severity(used)}">`
         + `<span class="row">${label} <span class="percent">${used}% used</span> <span class="reset">(${resetText(value.resetsAt, withDate)})</span></span>`
         + `<span class="meter"><span class="fill" style="width: ${fill}%"></span></span>`
         + `</span>`;
     }
 
+    // Windows are sorted shortest-first so every brand reads the same way,
+    // however many limits its plan exposes.
+    function usageGroup(brand, windows, extra = '') {
+      const sorted = windows
+        .filter(Boolean)
+        .sort((a, b) => (a.windowDurationMins ?? 0) - (b.windowDurationMins ?? 0));
+      const body = sorted.length
+        ? sorted.map(metric).join('<span class="dot">•</span>')
+        : `<span class="metric empty"><span class="row">unavailable</span></span>`;
+      return `<section class="group"><span class="brand">${brand}</span>${extra}${body}</section>`;
+    }
+
+    function sessionDots(sessions) {
+      const now = Date.now();
+      const ages = Object.values(sessions ?? {})
+        .map(session => now - new Date(session.updatedAt ?? 0).getTime())
+        .filter(age => Number.isFinite(age) && age >= 0 && age < sessionIdleMs)
+        .sort((a, b) => a - b);
+      if (!ages.length) return '';
+      const active = ages.filter(age => age < sessionActiveMs).length;
+      const dots = ages
+        .map(age => age < sessionActiveMs ? '<span class="on">●</span>' : '<span class="off">○</span>')
+        .join('');
+      return `<span class="dots" title="${active} active of ${ages.length} open sessions">${dots}</span>`;
+    }
+
+    function vital(label, value, klass = '') {
+      return `<span class="vital ${klass}"><span class="lbl">${label}</span> <span class="val">${value}</span></span>`;
+    }
+
+    function gigabytes(bytes) {
+      return bytes / 1024 ** 3;
+    }
+
+    function rateText(bytesPerSecond) {
+      if (!Number.isFinite(bytesPerSecond)) return '–';
+      if (bytesPerSecond >= 1024 ** 2) return `${(bytesPerSecond / 1024 ** 2).toFixed(1)}M`;
+      if (bytesPerSecond >= 1024) return `${Math.round(bytesPerSecond / 1024)}K`;
+      return `${Math.round(bytesPerSecond)}B`;
+    }
+
+    // The provider reports counters, not rates, so the rate is derived from
+    // deltas here rather than trusting the refresh interval to be exact.
+    function sampleNetwork(network) {
+      const traffic = network?.traffic;
+      if (!traffic) return;
+      const sample = {
+        down: traffic.totalReceived?.bytes ?? 0,
+        up: traffic.totalTransmitted?.bytes ?? 0,
+        at: Date.now(),
+      };
+      if (netSample && sample.at > netSample.at) {
+        const seconds = (sample.at - netSample.at) / 1000;
+        netRate = {
+          down: Math.max(0, (sample.down - netSample.down) / seconds),
+          up: Math.max(0, (sample.up - netSample.up) / seconds),
+        };
+      }
+      netSample = sample;
+    }
+
+    function renderVitals() {
+      const parts = [];
+      const gpu = state?.gpu;
+      if (gpu) {
+        const memory = `${gigabytes(gpu.memoryUsedMb * 1024 ** 2).toFixed(1)}/${Math.round(gigabytes(gpu.memoryTotalMb * 1024 ** 2))}G`;
+        parts.push(vital('gpu', `${Math.round(gpu.usedPercent)}% ${memory}`, severity(gpu.usedPercent)));
+      }
+      const cpu = vitals.cpu;
+      if (cpu) parts.push(vital('cpu', `${Math.round(cpu.usage)}%`, severity(cpu.usage)));
+      const memory = vitals.memory;
+      if (memory) {
+        const detail = `${gigabytes(memory.usedMemory).toFixed(1)}/${Math.round(gigabytes(memory.totalMemory))}G`;
+        parts.push(vital('ram', `${Math.round(memory.usage)}% ${detail}`, severity(memory.usage)));
+      }
+      const network = vitals.network;
+      if (network) {
+        parts.push(network.defaultInterface
+          ? vital('net', `↓${rateText(netRate?.down)} ↑${rateText(netRate?.up)}`)
+          : vital('net', 'offline', 'warn'));
+      }
+      document.getElementById('vitals').innerHTML = parts.join('');
+    }
+
     // The clock stands in for the hidden taskbar, so it renders even when the
     // collector is down and the usage groups have nothing to show.
-    function render() {
+    function renderUsage() {
       const now = new Date();
       const usage = state
-        ? `<section class="group"><span class="brand">Codex</span>${metric('7d', state.codex?.primary)}</section>
-           <section class="group"><span class="brand">Claude</span>${metric('5h', state.claude?.fiveHour, false)}<span class="dot">•</span>${metric('7d', state.claude?.sevenDay)}</section>`
+        ? usageGroup('codex', [state.codex?.primary, state.codex?.secondary], sessionDots(state.codexSessions))
+          + usageGroup('claude', [state.claude?.fiveHour, state.claude?.sevenDay], sessionDots(state.claude?.sessions))
         : `<section class="group empty">${offline ? 'AI usage collector offline' : 'Loading AI usage…'}</section>`;
-      document.getElementById('bar').innerHTML = `${usage}
+
+      const tray = [];
+      const audio = vitals.audio?.defaultPlaybackDevice;
+      if (audio) tray.push(vital('vol', audio.isMuted ? 'muted' : `${Math.round(audio.volume)}%`, audio.isMuted ? 'warn' : ''));
+      const battery = vitals.battery;
+      if (battery) {
+        const charge = Math.round(battery.chargePercent);
+        const low = !battery.isCharging && charge <= 15 ? 'critical' : !battery.isCharging && charge <= 30 ? 'warn' : '';
+        tray.push(vital('bat', `${charge}%${battery.isCharging ? ' ⚡' : ''}`, low));
+      }
+
+      document.getElementById('usage').innerHTML = `${usage}
+        ${tray.length ? `<section class="group">${tray.join('<span class="dot">•</span>')}</section>` : ''}
         <section class="group clock"><span class="date">${dayText(now)}</span><span class="time">${timeText(now)}</span></section>`;
+    }
+
+    function render() {
+      renderVitals();
+      renderUsage();
     }
 
     async function refresh() {
@@ -98,8 +230,28 @@
       render();
     }
 
+    // Providers are optional: if the Zebar API fails to load, the AI usage
+    // groups and the clock still render.
+    try {
+      const zebar = await import('./zebar.js');
+      const providers = zebar.createProviderGroup({
+        cpu: { type: 'cpu', refreshInterval: 3000 },
+        memory: { type: 'memory', refreshInterval: 5000 },
+        battery: { type: 'battery', refreshInterval: 30000 },
+        network: { type: 'network', refreshInterval: 3000 },
+        audio: { type: 'audio' },
+      });
+      providers.onOutput(outputMap => {
+        vitals = outputMap;
+        sampleNetwork(outputMap.network);
+        render();
+      });
+    } catch (error) {
+      console.error('[ai-usage-bar] Zebar providers unavailable:', error);
+    }
+
     refresh();
-    setInterval(refresh, 15000);
+    setInterval(refresh, 5000);
     setInterval(render, 1000);
   </script>
 </body>

@@ -13,14 +13,14 @@
       "focused": false,
       "resizable": false,
       "transparent": true,
-      "includeFiles": ["*.html", "usage.json"],
+      "includeFiles": ["*.html", "*.js", "usage.json"],
       "presets": [
         {
           "name": "top-right",
-          "anchor": "top_right",
+          "anchor": "top_center",
           "offsetX": "0px",
           "offsetY": "0px",
-          "width": "1200px",
+          "width": "100%",
           "height": "42px",
           "monitorSelection": { "type": "primary" },
           "dockToEdge": { "enabled": true, "edge": "top", "windowMargin": "0px" }

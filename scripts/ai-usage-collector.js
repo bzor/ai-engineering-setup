@@ -22,6 +22,42 @@ function writeState(patch) {
 }
 
 const sessionTtlMs = 10 * 60_000;
+const codexSessionsRoot = path.join(process.env.USERPROFILE || '', '.codex', 'sessions');
+
+function dayDirectory(date) {
+  return path.join(
+    codexSessionsRoot,
+    String(date.getFullYear()),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  );
+}
+
+// Codex has no status-line hook to push from, so liveness is read off its
+// rollout logs instead: one file per session, touched as the session writes.
+// Only today and yesterday are scanned, which covers a session started before
+// midnight without walking the whole archive.
+function readCodexSessions() {
+  const now = Date.now();
+  const sessions = {};
+  const directories = new Set([dayDirectory(new Date(now)), dayDirectory(new Date(now - 86_400_000))]);
+  for (const directory of directories) {
+    let entries;
+    try { entries = fs.readdirSync(directory); } catch { continue; }
+    for (const entry of entries) {
+      const match = /^rollout-.*-([0-9a-f-]{36})\.jsonl$/i.exec(entry);
+      if (!match) continue;
+      let stats;
+      try { stats = fs.statSync(path.join(directory, entry)); } catch { continue; }
+      if (now - stats.mtimeMs > sessionTtlMs) continue;
+      const updatedAt = new Date(stats.mtimeMs).toISOString();
+      if (!sessions[match[1]] || sessions[match[1]].updatedAt < updatedAt) {
+        sessions[match[1]] = { updatedAt };
+      }
+    }
+  }
+  return sessions;
+}
 
 function normalizeContextWindow(value) {
   if (!value) return null;
@@ -181,9 +217,49 @@ async function updateCodex() {
   }
 }
 
+// GPU load is spiky, so it is sampled far more often than the rate limits.
+// A machine without an NVIDIA GPU fails once and is never polled again.
+let gpuAvailable = true;
+
+function queryGpu() {
+  return new Promise((resolve, reject) => {
+    const child = spawn('nvidia-smi', [
+      '--query-gpu=name,utilization.gpu,memory.used,memory.total',
+      '--format=csv,noheader,nounits',
+    ], { windowsHide: true });
+    let stdout = '';
+    child.stdout.on('data', chunk => { stdout += chunk; });
+    child.on('error', reject);
+    child.on('exit', code => {
+      if (code !== 0) return reject(new Error(`nvidia-smi exited with ${code}`));
+      const [name, usage, usedMb, totalMb] = stdout.split('\n')[0].split(',').map(field => field.trim());
+      if (!totalMb) return reject(new Error('nvidia-smi returned no GPU rows'));
+      resolve({
+        name,
+        usedPercent: Number(usage),
+        memoryUsedMb: Number(usedMb),
+        memoryTotalMb: Number(totalMb),
+        updatedAt: new Date().toISOString(),
+      });
+    });
+  });
+}
+
+// GPU and Codex sessions share one tick so they also share one write, keeping
+// the read-modify-write on usage.json to a single pass per interval.
+async function updateSamples() {
+  const patch = { codexSessions: readCodexSessions() };
+  if (gpuAvailable) {
+    try { patch.gpu = await queryGpu(); }
+    catch { gpuAvailable = false; patch.gpu = null; }
+  }
+  writeState(patch);
+}
+
 async function watch() {
-  await updateCodex();
+  await Promise.all([updateCodex(), updateSamples()]);
   setInterval(updateCodex, 60_000);
+  setInterval(updateSamples, 5_000);
 }
 
 if (process.argv.includes('--claude-status-line')) captureClaudeStatusLine();

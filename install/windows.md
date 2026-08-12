@@ -36,15 +36,18 @@ Start the collector and widget with:
 pwsh -NoProfile -File .\scripts\start-ai-usage-bar.ps1 -RegisterStartup
 ```
 
-`-RegisterStartup` also creates a per-user Windows startup shortcut so the
-collector and Zebar return after signing out or rebooting. It is safe to run
-again; the shortcut is refreshed in place.
+`-RegisterStartup` creates a per-user Windows scheduled task for the collector.
+The task starts at logon, automatically restarts after a reported failure, and
+has an independent one-minute watchdog trigger that recovers it after any kind
+of exit. Zebar retains its own startup registration. It is safe to run the
+command again; the task is refreshed in place.
 
 ### Placement
 
-The active preset is `top-right`, selected in `~/.glzr/zebar/settings.json`. It sets
-`dockToEdge` on the top edge, which registers the widget as a Windows appbar and
-reserves a 42px strip out of the desktop work area:
+The active preset is `top-right`, selected in `~/.glzr/zebar/settings.json`. It is
+anchored `top_center` at full monitor width and sets `dockToEdge` on the top edge,
+which registers the widget as a Windows appbar and reserves a 42px strip out of the
+desktop work area:
 
 ```powershell
 Add-Type -AssemblyName System.Windows.Forms
@@ -62,12 +65,51 @@ configured. The undocked `bottom-right` preset is retained in `zpack.json`.
 
 ### Readout
 
-Each metric shows percent used, a countdown to reset, and a 2px meter filled to the
-same percentage, coloured neutral below 70%, amber at 70%, red at 90%. The Claude
-five-hour window shows only a countdown; the seven-day windows add the local reset
-date in `M/D h:mmam` form. A clock sits at the right end, since the Windows taskbar
+The bar spans the full monitor width. Machine vitals sit on the left, AI usage and
+tray-style readouts on the right.
+
+Each usage metric shows percent used, a countdown to reset, and a 2px meter filled to
+the same percentage, coloured neutral below 70%, amber at 70%, red at 90%. Meters are
+reserved for windows that deplete and reset; instantaneous vitals stay plain text, so
+the two classes of number stay visually distinct. Windows are sorted shortest-first
+per brand and labelled from `windowDurationMins`, so a brand renders the same way
+however many limits its plan exposes. Windows shorter than a day show only a
+countdown; longer ones add the local reset date in `M/D h:mmam` form.
+
+Codex currently reports a single seven-day window; `secondary` is null on the
+`prolite` plan. A second window appears automatically if the plan gains one. The
+app-server also returns a separate model-specific limit under
+`rateLimitsByLimitId` (for example `codex_bengalfox` / GPT-5.3-Codex-Spark) which
+the collector does not read.
+
+Dots after the Claude brand are live sessions: filled when the session rendered its
+status line in the last two minutes, hollow when it is open but idle, dropped at the
+collector's ten-minute TTL. A clock sits at the right end, since the Windows taskbar
 is hidden — it renders even when the collector is down, so it never disappears with
 the usage groups.
+
+### Vitals
+
+GPU comes from the collector, which samples `nvidia-smi` every five seconds because
+GPU load is far spikier than a rate limit; a machine without an NVIDIA GPU fails the
+first probe and is never polled again. CPU, memory, network, battery, and volume come
+from Zebar's own providers via `configs/zebar/ai-usage-bar/zebar.js`.
+
+That file is the `zebar` npm package (pinned to 3.3.1, matching the installed Zebar)
+bundled to a single dependency-free ES module and vendored deliberately. The
+published package has bare imports of `zod`, `luxon`, and `@tauri-apps/api`, so it
+cannot be loaded directly by the browser, and importing it from a CDN would leave the
+bar without vitals at login before the network is up. Re-bundle after a Zebar upgrade:
+
+```powershell
+npm install zebar@<version> --no-save
+npx esbuild --bundle --format=esm --minify --outfile=configs\zebar\ai-usage-bar\zebar.js node_modules\zebar\dist\index.js
+```
+
+Provider loading is wrapped in a try/catch, so a failed or missing bundle costs the
+vitals but leaves the usage groups and the clock rendering. Network rates are derived
+from `totalReceived`/`totalTransmitted` counter deltas against local timestamps
+rather than trusting the refresh interval to be exact.
 
 ### Claude Code status line
 
