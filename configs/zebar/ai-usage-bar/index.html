@@ -29,6 +29,9 @@
     .critical .fill { background: #ff6b6b; }
     .dot { color: #5a5a5a; }
     .empty { color: #777; }
+    /* Numeric fields hold a fixed box so gaining or losing a digit shifts
+       nothing beside them; the font is monospace, so ch sizes them exactly. */
+    .num { display: inline-block; min-width: 4ch; text-align: right; }
     .vital { white-space: nowrap; color: #c8c8c8; }
     .vital .lbl { color: #8a8a8a; }
     .vital .val { color: #fff; }
@@ -66,6 +69,13 @@
       return `${hours % 12 || 12}:${String(date.getMinutes()).padStart(2, '0')}${hours < 12 ? 'am' : 'pm'}`;
     }
 
+    // Reserves the widest rendering of a numeric field (4 characters covers
+    // "100%", "1.2M" and "10.2"); min-width means an unexpectedly long value
+    // still grows rather than clipping.
+    function num(text, width = 4) {
+      return `<span class="num" style="min-width: ${width}ch">${text}</span>`;
+    }
+
     function severity(percent) {
       return percent >= 90 ? 'critical' : percent >= 70 ? 'warn' : '';
     }
@@ -99,7 +109,7 @@
       const label = windowLabel(value.windowDurationMins);
       const withDate = (value.windowDurationMins ?? 0) >= 1440;
       return `<span class="metric ${severity(used)}">`
-        + `<span class="row">${label} <span class="percent">${used}% used</span> <span class="reset">(${resetText(value.resetsAt, withDate)})</span></span>`
+        + `<span class="row">${label} <span class="percent">${num(`${used}%`)} used</span> <span class="reset">(${resetText(value.resetsAt, withDate)})</span></span>`
         + `<span class="meter"><span class="fill" style="width: ${fill}%"></span></span>`
         + `</span>`;
     }
@@ -169,20 +179,20 @@
       const parts = [];
       const gpu = state?.gpu;
       if (gpu) {
-        const memory = `${gigabytes(gpu.memoryUsedMb * 1024 ** 2).toFixed(1)}/${Math.round(gigabytes(gpu.memoryTotalMb * 1024 ** 2))}G`;
-        parts.push(vital('gpu', `${Math.round(gpu.usedPercent)}% ${memory}`, severity(gpu.usedPercent)));
+        const memory = `${num(gigabytes(gpu.memoryUsedMb * 1024 ** 2).toFixed(1))}/${Math.round(gigabytes(gpu.memoryTotalMb * 1024 ** 2))}G`;
+        parts.push(vital('gpu', `${num(`${Math.round(gpu.usedPercent)}%`)} ${memory}`, severity(gpu.usedPercent)));
       }
       const cpu = vitals.cpu;
-      if (cpu) parts.push(vital('cpu', `${Math.round(cpu.usage)}%`, severity(cpu.usage)));
+      if (cpu) parts.push(vital('cpu', num(`${Math.round(cpu.usage)}%`), severity(cpu.usage)));
       const memory = vitals.memory;
       if (memory) {
-        const detail = `${gigabytes(memory.usedMemory).toFixed(1)}/${Math.round(gigabytes(memory.totalMemory))}G`;
-        parts.push(vital('ram', `${Math.round(memory.usage)}% ${detail}`, severity(memory.usage)));
+        const detail = `${num(gigabytes(memory.usedMemory).toFixed(1))}/${Math.round(gigabytes(memory.totalMemory))}G`;
+        parts.push(vital('ram', `${num(`${Math.round(memory.usage)}%`)} ${detail}`, severity(memory.usage)));
       }
       const network = vitals.network;
       if (network) {
         parts.push(network.defaultInterface
-          ? vital('net', `↓${rateText(netRate?.down)} ↑${rateText(netRate?.up)}`)
+          ? vital('net', `↓${num(rateText(netRate?.down))} ↑${num(rateText(netRate?.up))}`)
           : vital('net', 'offline', 'warn'));
       }
       document.getElementById('vitals').innerHTML = parts.join('');
@@ -199,12 +209,12 @@
 
       const tray = [];
       const audio = vitals.audio?.defaultPlaybackDevice;
-      if (audio) tray.push(vital('vol', audio.isMuted ? 'muted' : `${Math.round(audio.volume)}%`, audio.isMuted ? 'warn' : ''));
+      if (audio) tray.push(vital('vol', audio.isMuted ? 'muted' : num(`${Math.round(audio.volume)}%`), audio.isMuted ? 'warn' : ''));
       const battery = vitals.battery;
       if (battery) {
         const charge = Math.round(battery.chargePercent);
         const low = !battery.isCharging && charge <= 15 ? 'critical' : !battery.isCharging && charge <= 30 ? 'warn' : '';
-        tray.push(vital('bat', `${charge}%${battery.isCharging ? ' ⚡' : ''}`, low));
+        tray.push(vital('bat', `${num(`${charge}%`)}${battery.isCharging ? ' ⚡' : ''}`, low));
       }
 
       document.getElementById('usage').innerHTML = `${usage}
