@@ -148,16 +148,32 @@ require("lazy").setup({
 
     {
       "nvim-treesitter/nvim-treesitter",
-      branch = "master",
+      branch = "main",
+      lazy = false,
       build = ":TSUpdate",
       config = function()
-        require("nvim-treesitter.configs").setup({
-          ensure_installed = (not is_windows or has_c_compiler)
-              and { "glsl", "lua", "javascript", "typescript", "tsx", "markdown", "markdown_inline" }
-            or {},
-          auto_install = not is_windows or has_c_compiler,
-          highlight = { enable = true },
-          indent = { enable = true },
+        vim.o.foldlevelstart = 99 -- keep folds open on file open; treesitter foldexpr below only computes them
+
+        if not is_windows or has_c_compiler then
+          require("nvim-treesitter").install({
+            "glsl",
+            "lua",
+            "javascript",
+            "typescript",
+            "tsx",
+            "markdown",
+            "markdown_inline",
+          })
+        end
+
+        vim.api.nvim_create_autocmd("FileType", {
+          pattern = { "glsl", "lua", "javascript", "typescript", "typescriptreact", "markdown" },
+          callback = function()
+            vim.treesitter.start()
+            vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+            vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+            vim.wo[0][0].foldmethod = "expr"
+          end,
         })
       end,
     },
