@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
-# claude plan usage: "claude 5h 8% [2h 5m]  7d 2% [6d 17hr]"
+# claude plan usage: "claude 5h 8% [2h 5m]  7d 22%→61% [6d 17hr]"
 #
 # Claude Code only hands these numbers to the statusline hook, so
 # configs/claude/statusline.sh caches the rate_limits block here on every
 # refresh. Nothing outside a running session updates it — hence the stale dim.
+#
+# Multi-day windows (7d, 7d opus) get a "→NN%" pace projection: where this
+# window will land at reset if the burn rate so far holds. See project_pct in
+# usage_fmt.sh.
 #
 # Runs off the claude_name item and drives that whole group of items.
 
@@ -34,8 +38,18 @@ while read -r key pct at; do
   [ -n "$key" ] || continue
   expired "$at" && continue
   pct_r=$(printf '%.0f' "$pct")
-  (( pct_r > worst )) && worst=$pct_r
-  pieces+=("$(window_name "$key"):${pct_r}%")
+  stat="${pct_r}%"
+  worst_candidate=$pct_r
+  mins=$(key_minutes "$key")
+  if [ -n "$mins" ] && (( mins >= USAGE_PROJECT_MIN_MINUTES )); then
+    proj=$(project_pct "$pct" "$at" "$mins")
+    if [ -n "$proj" ]; then
+      stat="${pct_r}%→${proj}%"
+      (( proj > worst_candidate )) && worst_candidate=$proj
+    fi
+  fi
+  (( worst_candidate > worst )) && worst=$worst_candidate
+  pieces+=("$(window_name "$key"):${stat}")
   if [ "$at" != "0" ]; then pieces+=("$(reset_label "$at")"); else pieces+=(""); fi
 done < <(jq -r '
     # Shortest window first, to match how codex is ordered. Key order in the

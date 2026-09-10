@@ -80,6 +80,22 @@
       return percent >= 90 ? 'critical' : percent >= 70 ? 'warn' : '';
     }
 
+    // Only multi-day windows get a pace projection — a same-day window resets
+    // too often for "burn rate so far" to mean anything. The 3% elapsed floor
+    // avoids a wild extrapolation right after a window resets. Mirrors
+    // project_pct in configs/sketchybar/plugins/usage_fmt.sh.
+    const PROJECT_MIN_MINUTES = 1440;
+    const PROJECT_MIN_ELAPSED = 0.03;
+
+    function projectPercent(usedPercent, resetsAtSeconds, windowDurationMins) {
+      if (!resetsAtSeconds || !Number.isFinite(windowDurationMins) || windowDurationMins < PROJECT_MIN_MINUTES) return null;
+      const totalMs = windowDurationMins * 60_000;
+      const remainingMs = Math.max(0, resetsAtSeconds * 1000 - Date.now());
+      const elapsedMs = totalMs - remainingMs;
+      if (elapsedMs / totalMs < PROJECT_MIN_ELAPSED) return null;
+      return Math.min(999, Math.round((usedPercent * totalMs) / elapsedMs));
+    }
+
     function windowLabel(minutes) {
       if (!Number.isFinite(minutes)) return '?';
       if (minutes < 60) return `${minutes}m`;
@@ -108,8 +124,11 @@
       const fill = Math.max(0, Math.min(100, used));
       const label = windowLabel(value.windowDurationMins);
       const withDate = (value.windowDurationMins ?? 0) >= 1440;
-      return `<span class="metric ${severity(used)}">`
-        + `<span class="row">${label} <span class="percent">${num(`${used}%`)} used</span> <span class="reset">(${resetText(value.resetsAt, withDate)})</span></span>`
+      const projected = projectPercent(value.usedPercent ?? 0, value.resetsAt, value.windowDurationMins);
+      const usedText = projected != null ? `${used}%→${projected}%` : `${used}%`;
+      const worst = projected != null ? Math.max(used, projected) : used;
+      return `<span class="metric ${severity(worst)}">`
+        + `<span class="row">${label} <span class="percent">${num(usedText, projected != null ? 9 : 4)} used</span> <span class="reset">(${resetText(value.resetsAt, withDate)})</span></span>`
         + `<span class="meter"><span class="fill" style="width: ${fill}%"></span></span>`
         + `</span>`;
     }

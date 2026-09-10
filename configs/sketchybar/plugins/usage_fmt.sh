@@ -54,6 +54,44 @@ usage_color() {
 # build that many slots, so the two can't drift apart.
 USAGE_SLOTS=3
 
+# Only multi-day windows get a pace projection — a 5h window resets too often
+# for "burn rate so far" to mean much, and right at day-window start the same
+# is true, hence the 3% elapsed floor inside project_pct below.
+USAGE_PROJECT_MIN_MINUTES=1440
+
+# key_minutes <five_hour|seven_day|seven_day_opus|...> -> minutes, empty if
+# unknown. Claude's cache keys the window by name rather than duration, so
+# project_pct needs this to know which ones qualify for a projection.
+key_minutes() {
+  case "$1" in
+    five_hour)      echo 300 ;;
+    seven_day)      echo 10080 ;;
+    seven_day_opus) echo 10080 ;;
+    *)              echo "" ;;
+  esac
+}
+
+# project_pct <used pct> <resets_at epoch> <window minutes> -> projected
+# used-percentage at reset if the burn rate so far holds, or empty if it's too
+# early in the window (<3% elapsed) to extrapolate from. Capped at 999 so a
+# spike right after reset can't blow out the bar layout.
+project_pct() {
+  local used=$1 at=$2 mins=$3
+  [ "$at" != "0" ] && [ -n "$mins" ] || { echo ""; return; }
+  local now total left elapsed
+  now=$(date +%s)
+  total=$(( mins * 60 ))
+  left=$(( at - now ))
+  (( left < 0 )) && left=0
+  elapsed=$(( total - left ))
+  awk -v u="$used" -v e="$elapsed" -v t="$total" 'BEGIN {
+    if (t <= 0 || e / t < 0.03) { print ""; exit }
+    v = u * t / e
+    if (v > 999) v = 999
+    printf "%.0f", v
+  }'
+}
+
 # The dot between the two providers only means anything with a group either
 # side of it, so it follows whichever group is currently drawing.
 sync_separator() {

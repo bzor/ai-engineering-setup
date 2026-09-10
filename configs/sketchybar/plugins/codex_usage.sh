@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# codex plan usage: "codex 7d 10% [6d 1hr]"
+# codex plan usage: "codex 7d 10%→22% [6d 1hr]"
+#
+# Multi-day windows get a "→NN%" pace projection: where this window will land
+# at reset if the burn rate so far holds. See project_pct in usage_fmt.sh.
 #
 # codex app-server exposes account/rateLimits/read over JSON-RPC on stdio,
 # which answers straight from the account's current status — no session or
@@ -105,8 +108,17 @@ while read -r mins pct at; do
   [ -n "$mins" ] || continue
   expired "$at" && continue
   pct_r=$(printf '%.0f' "$pct")
-  (( pct_r > worst )) && worst=$pct_r
-  pieces+=("$(window_label "$mins"):${pct_r}%")
+  stat="${pct_r}%"
+  worst_candidate=$pct_r
+  if (( mins >= USAGE_PROJECT_MIN_MINUTES )); then
+    proj=$(project_pct "$pct" "$at" "$mins")
+    if [ -n "$proj" ]; then
+      stat="${pct_r}%→${proj}%"
+      (( proj > worst_candidate )) && worst_candidate=$proj
+    fi
+  fi
+  (( worst_candidate > worst )) && worst=$worst_candidate
+  pieces+=("$(window_label "$mins"):${stat}")
   if [ "$at" != "0" ]; then pieces+=("$(reset_label "$at")"); else pieces+=(""); fi
 done < <(jq -r '[.primary, .secondary]
                 | map(select(type == "object"))
