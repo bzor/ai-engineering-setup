@@ -42,6 +42,11 @@ has an independent one-minute watchdog trigger that recovers it after any kind
 of exit. Zebar retains its own startup registration. It is safe to run the
 command again; the task is refreshed in place.
 
+The task launches Node through `scripts/run-hidden.vbs`. A task that runs only
+while the user is logged on cannot suppress a console window, so running
+`node.exe` as the action leaves a blank terminal on the desktop titled with the
+Node path for as long as the collector lives.
+
 ### Placement
 
 The active preset is `top-right`, selected in `~/.glzr/zebar/settings.json`. It is
