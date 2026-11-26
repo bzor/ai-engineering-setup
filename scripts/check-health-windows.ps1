@@ -42,7 +42,7 @@ if (Get-Command herdr -ErrorAction SilentlyContinue) {
     $warnings.Add('Herdr native Windows support is preview/beta; interactive pane rendering still needs day-to-day validation.')
 }
 if (-not (Get-Command cl,gcc,clang,zig -ErrorAction SilentlyContinue)) {
-    $warnings.Add('No supported C/C++ compiler on PATH; Telescope fzf-native and new Treesitter parser builds are disabled.')
+    $warnings.Add('No supported C/C++ compiler on PATH; Telescope fzf-native is disabled. Treesitter is unaffected: it uses the parsers bundled with Neovim.')
 }
 if (-not (Get-Command mmdc -ErrorAction SilentlyContinue)) {
     $warnings.Add('Mermaid CLI (mmdc) is absent; Markdown Mermaid rendering remains optional.')

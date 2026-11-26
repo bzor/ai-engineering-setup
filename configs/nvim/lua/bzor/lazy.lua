@@ -1,8 +1,6 @@
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 local is_windows = vim.fn.has("win32") == 1
-local has_c_compiler = vim.fn.executable("cl") == 1 or vim.fn.executable("gcc") == 1
-  or vim.fn.executable("clang") == 1 or vim.fn.executable("zig") == 1
 
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = "https://github.com/folke/lazy.nvim.git"
@@ -144,38 +142,6 @@ require("lazy").setup({
       opts = {
         open_for_directories = false,
       },
-    },
-
-    {
-      "nvim-treesitter/nvim-treesitter",
-      branch = "main",
-      lazy = false,
-      build = ":TSUpdate",
-      config = function()
-        vim.o.foldlevelstart = 99 -- keep folds open on file open; treesitter foldexpr below only computes them
-
-        if not is_windows or has_c_compiler then
-          require("nvim-treesitter").install({
-            "glsl",
-            "lua",
-            "javascript",
-            "typescript",
-            "tsx",
-            "markdown",
-            "markdown_inline",
-          })
-        end
-
-        vim.api.nvim_create_autocmd("FileType", {
-          pattern = { "glsl", "lua", "javascript", "typescript", "typescriptreact", "markdown" },
-          callback = function()
-            vim.treesitter.start()
-            vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-            vim.wo[0][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
-            vim.wo[0][0].foldmethod = "expr"
-          end,
-        })
-      end,
     },
 
     {

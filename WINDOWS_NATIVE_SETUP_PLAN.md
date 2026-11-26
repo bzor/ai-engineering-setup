@@ -208,7 +208,7 @@ Audit the existing Neovim configuration and keep changes minimal.
 - [ ] Prefer a supported CMake build on Windows when the required compiler is available.
 - [ ] If no compiler exists, keep Telescope usable without the native FZF extension and report the optional limitation.
 - [ ] Do not install Visual Studio Build Tools without approval.
-- [ ] Verify `nvim-treesitter` compiler requirements and ask before installing a large toolchain.
+- [x] Verify `nvim-treesitter` compiler requirements and ask before installing a large toolchain. Resolved by dropping the plugin: its `master` branch is incompatible with Neovim 0.12 and no branch can build a parser without a toolchain, so highlighting now uses Neovim's bundled parsers.
 - [ ] Confirm native Windows clipboard integration works with `unnamedplus`.
 - [ ] Confirm Yazi launches from Neovim.
 - [ ] Confirm ImageMagick is found as `magick` and that `image.nvim` behaves correctly in Windows WezTerm.

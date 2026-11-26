@@ -150,7 +150,11 @@ Customize project roots, active projects, and the optional agent command in `con
 
 ## Neovim notes
 
-On Windows, Telescope's native FZF extension builds only when CMake and a supported C/C++ compiler are present. Telescope remains usable without it. This machine has no supported compiler on PATH, so native FZF and future Treesitter parser compilation are disabled; installing Visual Studio Build Tools requires approval. The existing requested Treesitter parsers are current. Clipboard uses native `unnamedplus`; Yazi and ImageMagick are found as external commands. Mermaid rendering remains optional because `mmdc` is not installed. `image.nvim` uses the graphics protocol implemented by WezTerm, but multiplexer image behavior depends on Herdr's Windows beta.
+On Windows, Telescope's native FZF extension builds only when CMake and a supported C/C++ compiler are present. Telescope remains usable without it. This machine has no supported compiler on PATH, so native FZF is disabled; installing Visual Studio Build Tools requires approval.
+
+Treesitter highlighting comes from Neovim itself. `nvim-treesitter` is deliberately not installed: its `master` branch is frozen at Neovim 0.10 and throws on 0.12, where `Query:iter_matches` no longer honours `all = false` and capture values are always node lists, so its `set-lang-from-info-string!` markdown directive called `:range()` on a table and broke every `image.nvim` render. The `main` branch is the supported successor, but no branch can build a parser without a C compiler. Neovim 0.12 ships parsers and queries for c, lua, markdown, markdown_inline, query, vim and vimdoc, and starts them via its own ftplugins plus the `FileType` autocmd in `configs/nvim/lua/bzor/set.lua`. The GLSL template-literal injections in `configs/nvim/queries/` stay in place but are inert until javascript, typescript, tsx and glsl parsers exist, which needs a toolchain. Adding one (Zig is a single binary and enough) and moving to `nvim-treesitter`'s `main` branch is the upgrade path if those languages need highlighting.
+
+Clipboard uses native `unnamedplus`; Yazi and ImageMagick are found as external commands. Mermaid rendering remains optional because `mmdc` is not installed. `image.nvim` uses the graphics protocol implemented by WezTerm, but multiplexer image behavior depends on Herdr's Windows beta.
 
 ## Wispr Flow dictation in Codex
 
